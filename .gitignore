@@ -1,4 +1,4 @@
-coodddaaaa/__pycache__/*
-.idea/*
-.ipynb_checkpoints/*
-coodddaaaa.egg-info/*
+/.idea/
+/.ipynb_checkpoints/
+/coodddaaaa.egg-info/
+/coodddaaaa/__pycache__/
