@@ -1,4 +1,6 @@
 """
+Copyright (c) 2023 maximilien.lehujeur
+
 Finds the maximum of a random array with subsample precision
 by looking for the zero crossing of the
 first order finite difference derivative

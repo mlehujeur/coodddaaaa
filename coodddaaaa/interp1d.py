@@ -1,4 +1,6 @@
 """
+Copyright (c) 2023 maximilien.lehujeur
+
 Linear and cubic interpolation in 1d using fixed grids
 and sparse operators for cases where one need 
 to interpolate functions on the same grids many times

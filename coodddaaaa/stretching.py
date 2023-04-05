@@ -1,3 +1,7 @@
+"""
+Copyright (c) 2023 maximilien.lehujeur
+"""
+
 import numpy as np
 from coodddaaaa.interp1d import LinearInterpolator1d, CubicInterpolator1d
 from coodddaaaa.hypermax import hypermax
