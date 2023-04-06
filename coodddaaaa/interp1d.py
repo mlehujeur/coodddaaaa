@@ -183,31 +183,36 @@ class CubicInterpolator1d:
         else:
             raise ValueError
 
-        rows = []
-        cols = []
-        vals = []
+        ni = len(xi)  # numb of interp poinst
+        x = np.arange(nx) * dx + x0  # nodes
+        xmin, xmax = x.min(), x.max()  # interp bounds
 
-        xmin, xmax = self.x.min(), self.x.max()
-        for i in range(len(self.xi)):
-            if xmin < self.xi[i] < xmax:
-                # TODO : avoid searchorted, the grid is regular!
-                k = np.searchsorted(self.x, self.xi[i], side="right")
-                assert self.x[k-1] <= self.xi[i] < self.x[k]
+        # find indexs of x of nodes located after the interp points xi
+        k = np.ceil((xi - xmin) / dx).astype(int)
 
-                x = self.xi[i]  # evaluation point
+        # find the interp points that occur within the interp bounds
+        m = (k > 0) & (k < nx)  # mask
+        m = np.arange(len(xi))[m]  # to indexs
+        km = k[m]  # eliminate the interp points out of bounds => interp will return 0 for these nodes
+        xim = xi[m]  # same
 
-                rows.append(i)
-                cols.append(k-1)
-                vals.append((self.x[k] - x)**3. / (6. * self.dx) - self.dx * (self.x[k] - x) / 6.)
+        # nodes before the interpolation points
+        rows1 = m
+        cols1 = km - 1
+        vals1 = (x[km] - xim)**3. / (6. * self.dx) - self.dx * (x[km] - xim) / 6.
 
-                rows.append(i)
-                cols.append(k)
-                vals.append((x - self.x[k-1])**3. / (6. * self.dx) - self.dx * (x - self.x[k-1]) / 6.)
-            else:
-                # otherwise the interpolation will be 0, add a fictive row in the linear operator
-                pass
+        # nodes after the interpolation points
+        rows2 = m
+        cols2 = km
+        vals2 = (xim - x[km-1])**3. / (6. * self.dx) - self.dx * (xim - x[km-1]) / 6.
 
-        self.eq1_operator = _sp_matrix((vals, (rows, cols)), shape=(len(self.xi), len(self.x)))
+        # assemble
+        self.eq1_operator = _sp_matrix(
+            (np.concatenate((vals1, vals2)),
+             (np.concatenate((rows1, rows2)),
+              np.concatenate((cols1, cols2)))
+             ),
+            shape=(ni, nx))
 
     def __call__(self, f):
         assert isinstance(f, np.ndarray)
