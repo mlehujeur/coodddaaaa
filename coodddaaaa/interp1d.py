@@ -16,7 +16,7 @@ from scipy.sparse import linalg as splinalg
 import numpy as np
 
 
-class LinearInterpolator1d(object):
+class LinearInterpolator1d:
     """
     Linear interpolation operator 
     """
@@ -47,28 +47,30 @@ class LinearInterpolator1d(object):
         # nodes
         x = np.arange(nx) * dx + x0
 
-        idx_xi_to_interp, idx_x_after_interp_points = \
-            self._find_interp_points_in_grid(x0, nx, dx, xi)
+        self._idx_xi_to_interp, self._idx_x_after_interp_points = \
+            self.find_interp_points_in_grid(x0, nx, dx, xi)
 
         # nodes before the interpolation points
-        rows1 = idx_xi_to_interp
-        cols1 = idx_x_after_interp_points - 1
-        vals1 = (x[idx_x_after_interp_points] - xi[idx_xi_to_interp]) / self.dx
+        rows1 = self._idx_xi_to_interp
+        cols1 = self._idx_x_after_interp_points - 1
+        dxafter = (x[self._idx_x_after_interp_points] - xi[self._idx_xi_to_interp])
+        vals1 = dxafter / self.dx
 
         # nodes after the interpolation points
-        rows2 = idx_xi_to_interp
-        cols2 = idx_x_after_interp_points
-        vals2 = (xi[idx_xi_to_interp] - x[idx_x_after_interp_points-1]) / self.dx
+        rows2 = self._idx_xi_to_interp
+        cols2 = self._idx_x_after_interp_points
+        dxbefore = (xi[self._idx_xi_to_interp] - x[self._idx_x_after_interp_points - 1])
+        vals2 = dxbefore / self.dx
 
         # assemble
-        self.operator = _sp_matrix(
+        self.lininterp_operator = _sp_matrix(
             (np.concatenate((vals1, vals2)),
              (np.concatenate((rows1, rows2)),
               np.concatenate((cols1, cols2)))
              ),
             shape=(len(self.xi), self.nx))
 
-    def _find_interp_points_in_grid(self, x0: float, nx: int, dx: float, xi: np.ndarray):
+    def find_interp_points_in_grid(self, x0: float, nx: int, dx: float, xi: np.ndarray):
 
         # find indexs of x of nodes located after the interp points xi
         k = np.ceil((xi - x0) / dx).astype(int)
@@ -91,23 +93,22 @@ class LinearInterpolator1d(object):
         # assert f.ndim == 1
         # assert len(f) == len(self.x)
 
-        return self.operator * f
+        return self.lininterp_operator * f
 
 
 class SecondDerivativeOperatorTypeII:
-    def __init__(self, x0: float, nx: int, dx: float, format: str ="csc"):
+    def __init__(self, nx: int, dx: float, format: str ="csc"):
         """
         Second derivative operator order 3 in the internal domain,
         Implement type II boundary condition after https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
         For a regular grid only
         x is the grid at which the function will be defined (nodes)
         xi are the points where the function will be interpolated
-        :param x0: x of first sample
-        :param nx: number of samples
-        :param dx: sampling interval
+        :param nx: number of nodes
+        :param dx: sampling interval between nodes
         :param format: format of the sparse operator
         """
-        self.x = x0 + np.arange(nx) * dx
+        # self.x = x0 + np.arange(nx) * dx  # not needed
 
         if format == "csc":
             _sp_matrix = sp.csc_matrix
@@ -148,7 +149,7 @@ class SecondDerivativeOperatorTypeII:
         return self.operator * f
 
 
-class CubicInterpolator1d:
+class CubicInterpolator1d(LinearInterpolator1d):
     def __init__(self, x0: float, nx: int, dx: float, xi: np.ndarray, format: str ="csc"):
         """
         Lagrange Cubic interpolation with boundary type II from https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
@@ -162,16 +163,16 @@ class CubicInterpolator1d:
         :param format: format of the sparse operator
         """
 
-        # ==== set the grids
-        self.x0, self.nx, self.dx = x0, nx, dx
-        self.x = x0 + np.arange(nx) * dx  # nodes
-        self.xi = xi  # interp points
+        LinearInterpolator1d.__init__(self, x0=x0, nx=nx, dx=dx, xi=xi, format=format)
+
+        # # ==== set the grids
+        # self.x0, self.nx, self.dx = x0, nx, dx
+        # self.x = x0 + np.arange(nx) * dx  # nodes
+        # self.xi = xi  # interp points
 
         # ==== build the internal operators
-        self.linear_interpolator = LinearInterpolator1d(x0=x0, nx=nx, dx=dx, xi=xi, format=format)
-        self.second_derivativor = SecondDerivativeOperatorTypeII(x0=x0, nx=nx, dx=dx, format=format)
         # multiply by 3 because 6*f[xi-1,xi,xi+1] means 3 * [f(xi+1) - 2 * f(xi) + f(xi-1)] / (hi**2)
-        self.second_derivativor.operator = 3. * self.second_derivativor.operator
+        self.derivator = 3 * SecondDerivativeOperatorTypeII(nx=nx, dx=dx, format=format).operator
 
         # left term in eq (6) from https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
         upper_diag = .5 * np.ones(nx-1, float)  # lambda terms
@@ -191,49 +192,38 @@ class CubicInterpolator1d:
         else:
             raise ValueError
 
-        ni = len(xi)  # numb of interp poinst
-        x = np.arange(nx) * dx + x0  # nodes
-        xmin, xmax = x.min(), x.max()  # interp bounds
-
-        # find indexs of x of nodes located after the interp points xi
-        k = np.ceil((xi - xmin) / dx).astype(int)
-
-        # find the interp points that occur within the interp bounds
-        m = (k > 0) & (k < nx)  # mask
-        m = np.arange(len(xi))[m]  # to indexs
-        km = k[m]  # eliminate the interp points out of bounds => interp will return 0 for these nodes
-        xim = xi[m]  # same
-
         # nodes before the interpolation points
-        rows1 = m
-        cols1 = km - 1
-        vals1 = (x[km] - xim)**3. / (6. * self.dx) - self.dx * (x[km] - xim) / 6.
+        rows1 = self._idx_xi_to_interp
+        cols1 = self._idx_x_after_interp_points - 1
+        dxafter = (x[self._idx_x_after_interp_points] - xi[self._idx_xi_to_interp])
+        vals1 = dxafter ** 3. / (6. * self.dx) - self.dx * dxafter / 6.
 
         # nodes after the interpolation points
-        rows2 = m
-        cols2 = km
-        vals2 = (xim - x[km-1])**3. / (6. * self.dx) - self.dx * (xim - x[km-1]) / 6.
+        rows2 = self._idx_xi_to_interp
+        cols2 = self._idx_x_after_interp_points
+        dxbefore = (xi[self._idx_xi_to_interp] - x[self._idx_x_after_interp_points-1])
+        vals2 = dxbefore ** 3. / (6. * self.dx) - self.dx * dxbefore / 6.
 
         # assemble
-        self.eq1_operator = _sp_matrix(
+        self.cubinterp_operator = _sp_matrix(
             (np.concatenate((vals1, vals2)),
              (np.concatenate((rows1, rows2)),
               np.concatenate((cols1, cols2)))
              ),
-            shape=(ni, nx))
+            shape=(len(self.xi), nx))
 
     def __call__(self, f):
         assert isinstance(f, np.ndarray)
         assert f.ndim == 1
-        assert len(f) == len(self.x)
+        assert len(f) == self.nx
 
         # 3 * f[xi-1, xi, xi+1], d0=d-1=0 for type II boundary condition
-        d = self.second_derivativor.operator * f
+        d = self.derivator * f
 
         # solve equation (6) for M
         m = self.solver.solve(d)
 
-        return self.eq1_operator * m + self.linear_interpolator.operator * f
+        return self.cubinterp_operator * m + self.lininterp_operator * f
 
     # TODO : add method to export/reload from npz file
 
