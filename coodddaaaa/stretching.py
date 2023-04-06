@@ -2,6 +2,7 @@
 Copyright (c) 2023 maximilien.lehujeur
 """
 
+from typing import Union
 import numpy as np
 from coodddaaaa.interp1d import LinearInterpolator1d, CubicInterpolator1d
 from coodddaaaa.hypermax import hypermax
@@ -85,61 +86,78 @@ class Stretcher:
 
         return x_stretched
 
-    def corr1d(self, x: np.ndarray, x_stretched: np.ndarray) -> np.ndarray:
+    def corr(self, x: np.ndarray, x_stretched: np.ndarray) -> np.ndarray:
         """
         Stretching correlation of x with a basis of stretched versions of the reference signal
-        :param x: signal(s) to be correlated to the reference, np.ndarray, 1d, shape (nt, )
+        :param x: signal(s) to be correlated to the reference, np.ndarray,
+            either one single signal, 1d, shape (nt, )
+            or a bscan, 2d, shape (ntraces, nt)
         :param x_stretched: stretched reference from self.stretch, np.ndarray, 2d, shape (neps, nt, )
-        :return c: correlation function np.ndarray, 1d, shape (neps, )
+        :return c: correlation function np.ndarray,
+            either 1d, shape (neps, ) if x is 1d
+            or 2d, shape (neps, ntraces) if x is 2d
         """
-        assert x.ndim == 1, f'Dimension Error : x must be 1 trace of shape (nt={self.nt}, )'
-        assert x.shape == (self.nt, ), f'Shape Error : x must be 1 trace of shape (nt={self.nt}, )'
-
-        c = x_stretched.dot(x) * self.dt  # np.ndarray, shape (neps, )
-
-        if self.norm:
-            # the normalization relative to x_stretched
-            # is already done
-            c /= x.dot(x) ** 0.5 * self.dt
-
-        return c
-
-    def corr2d(self, x: np.ndarray, x_stretched: np.ndarray) -> np.ndarray:
-        """
-        Stretching correlation of x with a basis of stretched versions of the reference signal
-        :param x: signal(s) to be correlated to the reference, np.ndarray, 2d, shape (ntraces, nt)
-        :param x_stretched: stretched reference from self.stretch, np.ndarray, 2d, shape (neps, nt, )
-        :return c: correlation function np.ndarray, 2d, shape (neps, ntraces)
-        """
-        assert x.ndim == 2, f'Dimension Error : x must be a bscan of shape (ntraces, nt={self.nt})'
-        assert x.shape[1] == self.nt, f'Shape Error : x must be a bscan of shape (ntraces, nt={self.nt})'
-
-        c = x_stretched.dot(x.T) * self.dt  # np.ndarray, 2d, shape (neps, ntraces)
-
-        if self.norm:
-            # the normalization relative to x_stretched
-            # is already done
-            # divide each column of c (i.e. the correlation for each trace) by the normalization constant of the trace
-            c /= (x * x).sum(axis=1) ** 0.5 * self.dt  # shape (ntraces, )
-
-        return c
-
-    def corr(self, x, x_stretched):
         if x.ndim == 1:
-            return self.corr1d(x, x_stretched)
-        elif x.ndim == 2:
-            return self.corr2d(x, x_stretched)
-        else:
-            raise Exception
+            assert x.shape == (self.nt, ), f'Shape Error : x must be 1 trace of shape (nt={self.nt}, )'
 
-    def corrmax(self, c: np.ndarray) -> (float, float):
+        elif x.ndim == 2:
+            assert x.shape[1] == self.nt, f'Shape Error : x must be a bscan of shape (ntraces, nt={self.nt})'
+
+        else:
+            raise ValueError('Shape Error, x must be 1d (for single signal) or 2d (for a bscan)')
+
+        c = x_stretched.dot(x.T) * self.dt  # np.ndarray, shape (neps, ntraces)
+
+        if self.norm:
+            # the normalization relative to x_stretched
+            # is already done
+            if x.ndim == 1:
+                # faster?
+                c /= x.dot(x) ** 0.5 * self.dt
+            elif x.ndim == 2:
+                c /= (x * x).sum(axis=-1) ** 0.5 * self.dt  # shape (ntraces, )
+            else:
+                raise Exception('programming error')
+        return c
+
+    def corrmax(self, c: np.ndarray) -> (Union[float, np.ndarray], Union[float, np.ndarray]):
         """
         find the maximum of the correlation function with subsample precision
+        :param c: correlation function(s) from self.corr
+            1d for a single signal, shape (neps, )
+            2d for a bscan, shape (neps, ntraces)
+        :return emax: best epsilon value, dimensionless, it corresponds to dt/t
+            float if c is 1d
+            1d array, shape (ntraces, ) if c is 2d
+        :return cmax: max correlation, dimensionless, normalized if norm was True in __init__
+            float if c is 1d
+            1d array, shape (ntraces, ) if c is 2d
         """
-        epsmax = hypermax(
-            time_array=self.eps, function_array=c,
-            assume_t_growing=True)
-        return epsmax, c.max()
+        if c.ndim == 1:
+            epsmax = hypermax(
+                time_array=self.eps,
+                function_array=c,
+                assume_t_growing=True)
+            cmax = c.max()
+
+        elif c.ndim == 2:
+            neps, ntraces = c.shape
+            assert neps == len(self.eps), f"Shape Error, c must be of shape (neps={len(self.eps)}, ntraces)"
+
+            epsmax = np.zeros(ntraces, float)
+            for i in range(ntraces):
+                # TODO : implement 2d version of hypermax to avoid the loop ?
+                epsmax[i] = hypermax(
+                    time_array=self.eps,
+                    function_array=c[:, i],
+                    assume_t_growing=True)
+            cmax = c.max(axis=0)  # one max per trace
+
+        else:
+            raise ValueError(
+                f'Shape Error, c must be 1d (single trace) or 2d (bscan)')
+
+        return epsmax, cmax
 
     def corr_all_with_all(self, data: np.ndarray) -> (np.ndarray, np.ndarray):
         """
@@ -157,28 +175,33 @@ class Stretcher:
 
         c_triu = np.zeros(ntraces * (ntraces - 1) // 2)
         e_triu = np.zeros(ntraces * (ntraces - 1) // 2)
-        itriu, jtriu = np.triu_indices(ntraces, 1)
+        # itriu, jtriu = np.triu_indices(ntraces, 1)
 
         n = 0
         for i in range(ntraces - 1):
+            # stretch new reference
             y = data[i, :]
             y_stretched = self.stretch(y)
 
-            for j in range(i + 1, ntraces):
-                x = data[j, :]
-                cij = self.corr(x, y_stretched)
-                emax, cmax = self.corrmax(cij)
-
-                c_triu[n] = cmax
-                e_triu[n] = emax
-                n += 1
+            # correlate all remaining traces to this new reference
+            m = ntraces - i - 1
+            cijs = self.corr(x=data[i + 1:, :], x_stretched=y_stretched)
+            e_triu[n: n+m], c_triu[n: n+m] = self.corrmax(cijs)
+            n += m
 
         return c_triu, e_triu
 
     @staticmethod
-    def triu2dense(x_triu, symetric: bool, diag: float) -> np.ndarray:
+    def triu2dense(x_triu: np.ndarray, symetric: bool, diag: float) -> np.ndarray:
         """
         convert upper triangle matrix to square matrix
+        :param x_triu: a flat upper triangle without diagonal, 1d, np.ndarray, shape (ntraces * (ntraces - 1) / 2, )
+        :param symetric: to impose symetry (True) or anti-symetry (False)
+        :param diag: the value to put on the diagonal
+        :return x:
+            a square matrix with x_triu on its upper triangle, shape (ntraces, ntraces)
+            diag on its diagonal
+            +-x_triu on its lower triangle
         """
         # 2n = (x * (x -1))
         # 2n = x ** 2 - x
@@ -197,20 +220,23 @@ class Stretcher:
         return x
 
     @staticmethod
-    def stretching_uncertainty(c, fmin, fmax, t1, t2):
+    def stretching_uncertainty(
+            cmax: Union[float, np.ndarray], fmin: float, fmax: float, tmin: float, tmax: float) \
+            -> Union[float, np.ndarray]:
         """
         stretching uncertainty after Weaver et al 2011
-        :param c: correlation coefficient
-        :param fmin: lower freq Hz
-        :param fmax: upper freq Hz
-        :param t1: start coda time in s
-        :param t2: end coda time in s
-        :return rmse: uncertainty on epsilon
+        :param cmax: max correlation coefficient from self.corrmax, either a float or a np.ndarray
+        :param fmin: lower freq Hz, float
+        :param fmax: upper freq Hz, float
+        :param tmin: start coda time in s, float
+        :param tmax: end coda time in s, float
+        :return rmse: uncertainty on epsilon, same type as cmax
         """
+
         wc = 2. * np.pi * np.sqrt(fmin * fmax)
         T = 1. / (fmax - fmin) / (np.pi * np.sqrt(2.))
-        X = c
+        X = cmax
         rmse = np.sqrt(1 - X ** 2.) / (2 * X)
-        rmse *= np.sqrt((6 * T * np.sqrt(np.pi / 2.)) / (wc ** 2. * (t2 ** 3 - t1 ** 3)))
-        # print(rmse.min(), rmse.max())
+        rmse *= np.sqrt((6 * T * np.sqrt(np.pi / 2.)) / (wc ** 2. * (tmax ** 3 - tmin ** 3)))
+
         return rmse
