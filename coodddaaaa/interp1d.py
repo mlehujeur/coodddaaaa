@@ -156,7 +156,7 @@ class CubicInterpolator1d(LinearInterpolator1d):
         """
 
         LinearInterpolator1d.__init__(self, x0=x0, nx=nx, dx=dx, xi=xi, format=format)
-        assert format in ['csc, csr']
+        assert format in ['csc', 'csr']
         _sp_matrix = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}[format]
 
         # ==== add more internal operators to move to cubic interpolation
