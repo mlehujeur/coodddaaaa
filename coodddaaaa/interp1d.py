@@ -16,7 +16,7 @@ from scipy.sparse import linalg as splinalg
 import numpy as np
 
 
-class LinearInterpolator1d:
+class LinearInterpolator1d(object):
     """
     Linear interpolation operator 
     """
@@ -32,12 +32,8 @@ class LinearInterpolator1d:
         :param format: format to use for the linear operator
         """
 
-        if format == "csc":
-            _sp_matrix = sp.csc_matrix
-        elif format == "csr":
-            _sp_matrix = sp.csr_matrix  # TODO useful?
-        else:
-            raise ValueError
+        assert format in ['csc', 'csr']
+        _sp_matrix = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}[format]
 
         self.x0 = x0
         self.nx = nx
@@ -110,12 +106,8 @@ class SecondDerivativeOperatorTypeII:
         """
         # self.x = x0 + np.arange(nx) * dx  # not needed
 
-        if format == "csc":
-            _sp_matrix = sp.csc_matrix
-        elif format == "csr":
-            _sp_matrix = sp.csr_matrix
-        else:
-            raise ValueError
+        assert format in ['csc', 'csr']
+        _sp_matrix = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}[format]
 
         idx2 = dx ** -2.
 
@@ -164,15 +156,12 @@ class CubicInterpolator1d(LinearInterpolator1d):
         """
 
         LinearInterpolator1d.__init__(self, x0=x0, nx=nx, dx=dx, xi=xi, format=format)
+        assert format in ['csc, csr']
+        _sp_matrix = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}[format]
 
-        # # ==== set the grids
-        # self.x0, self.nx, self.dx = x0, nx, dx
-        # self.x = x0 + np.arange(nx) * dx  # nodes
-        # self.xi = xi  # interp points
-
-        # ==== build the internal operators
+        # ==== add more internal operators to move to cubic interpolation
         # multiply by 3 because 6*f[xi-1,xi,xi+1] means 3 * [f(xi+1) - 2 * f(xi) + f(xi-1)] / (hi**2)
-        self.derivator = 3 * SecondDerivativeOperatorTypeII(nx=nx, dx=dx, format=format).operator
+        self.derivator = 3. * SecondDerivativeOperatorTypeII(nx=nx, dx=dx, format=format).operator
 
         # left term in eq (6) from https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
         upper_diag = .5 * np.ones(nx-1, float)  # lambda terms
@@ -184,13 +173,7 @@ class CubicInterpolator1d(LinearInterpolator1d):
         self.solver = splinalg.splu(a)  # TODO : CORRECT? / OPTIMAL?
 
         # ==== Implement the operator for equation (1), with respect to Mis coefficients
-        #      the missing terms for yi and yi+1 are included in the linear_operator term
-        if format == "csc":
-            _sp_matrix = sp.csc_matrix
-        elif format == "csr":
-            _sp_matrix = sp.csr_matrix  # Useful?
-        else:
-            raise ValueError
+        #      the missing terms for yi and yi+1 are included in the self.lininterp_operator term
 
         # nodes before the interpolation points
         rows1 = self._idx_xi_to_interp
@@ -213,9 +196,10 @@ class CubicInterpolator1d(LinearInterpolator1d):
             shape=(len(self.xi), nx))
 
     def __call__(self, f):
-        assert isinstance(f, np.ndarray)
-        assert f.ndim == 1
-        assert len(f) == self.nx
+
+        # assert isinstance(f, np.ndarray)
+        # assert f.ndim == 1
+        # assert len(f) == self.nx
 
         # 3 * f[xi-1, xi, xi+1], d0=d-1=0 for type II boundary condition
         d = self.derivator * f
