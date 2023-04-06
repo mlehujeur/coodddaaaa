@@ -21,18 +21,16 @@ class LinearInterpolator1d(object):
     Linear interpolation operator 
     """
     
-    def __init__(self, x: np.ndarray, xi: np.ndarray, format: str ="csc"):
+    def __init__(self, x0: float, nx: int, dx: float, xi: np.ndarray, format: str ="csc"):
         """
-        :param x: the points where the function is defined (nodes)  => f(x) is provided in self.__call__
+        x is the grid at which the function will be defined (nodes)
+        xi are the points where the function will be interpolated
+        :param x0: x of first sample
+        :param nx: number of samples
+        :param dx: sampling interval
         :param xi: the points where we need the interpolated values  => f(xi) is computed by self.__call__
         :param format: format to use for the linear operator
         """
-        # TODO : go back to a regular grid, take x0, nx, dx in arguments to make sure the user is aware of this constraint
-        assert x.ndim == 1
-        assert (x[1:] > x[:-1]).all()
-        assert xi.ndim == 1
-        # assert xi.min() > x.min()
-        # assert xi.max() < x.max()
 
         if format == "csc":
             _sp_matrix = sp.csc_matrix
@@ -41,34 +39,42 @@ class LinearInterpolator1d(object):
         else:
             raise ValueError
 
-        self.x = x
+        self.x0 = x0
+        self.nx = nx
+        self.dx = dx
         self.xi = xi
-        rows = []
-        cols = []
-        vals = []
-        xmin, xmax = x.min(), x.max()
-        for i in range(len(self.xi)):
-            if xmin < self.xi[i] < xmax:
-                # TODO : avoid searchorted
-                k = np.searchsorted(self.x, self.xi[i], side="right")
-                assert self.x[k-1] <= self.xi[i] < self.x[k]
 
-                hk = (self.x[k] - self.x[k - 1])  # width of the segment
-                x = self.xi[i]  # evaluation point
+        ni = len(xi)  # numb of interp poinst
+        x = np.arange(nx) * dx + x0  # nodes
+        xmin, xmax = x.min(), x.max()  # interp bounds
 
-                rows.append(i)
-                cols.append(k-1)
-                vals.append((self.x[k] - x) / hk)
+        # find indexs of x of nodes located after the interp points xi
+        k = np.ceil((xi - xmin) / dx).astype(int)
 
-                rows.append(i)
-                cols.append(k)
-                vals.append((x - self.x[k-1]) / hk)
-            else:
-                # otherwise the interpolation will be 0, add a fictive row in the linear operator
-                pass
+        # find the interp points that occur within the interp bounds
+        m = (k > 0) & (k < nx)  # mask
+        m = np.arange(len(xi))[m]  # to indexs
+        km = k[m]  # eliminate the interp points out of bounds => interp will return 0 for these nodes
+        xim = xi[m]  # same
 
-        self.operator = _sp_matrix((vals, (rows, cols)), shape=(len(self.xi), len(self.x)))
-        
+        # nodes before the interpolation points
+        rows1 = m
+        cols1 = km - 1
+        vals1 = (x[km] - xim) / self.dx
+
+        # nodes after the interpolation points
+        rows2 = m
+        cols2 = km
+        vals2 = (xim - x[km-1]) / self.dx
+
+        # assemble
+        self.operator = _sp_matrix(
+            (np.concatenate((vals1, vals2)),
+             (np.concatenate((rows1, rows2)),
+              np.concatenate((cols1, cols2)))
+             ),
+            shape=(ni, nx))
+
     def __call__(self, f: np.ndarray):
         """
         affect function values at x and return the interpolated values at xi
@@ -85,7 +91,7 @@ class SecondDerivativeOperatorTypeII:
         """
         Second derivative operator order 3 in the internal domain,
         Implement type II boundary condition after https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
-        Works only on a regular grid
+        For a regular grid only
         x is the grid at which the function will be defined (nodes)
         xi are the points where the function will be interpolated
         :param x0: x of first sample
@@ -149,11 +155,12 @@ class CubicInterpolator1d:
         """
 
         # ==== set the grids
+        self.x0, self.nx, self.dx = x0, nx, dx
         self.x = x0 + np.arange(nx) * dx  # nodes
         self.xi = xi  # interp points
 
         # ==== build the internal operators
-        self.linear_interpolator = LinearInterpolator1d(x=self.x, xi=xi, format=format)
+        self.linear_interpolator = LinearInterpolator1d(x0=x0, nx=nx, dx=dx, xi=xi, format=format)
         self.second_derivativor = SecondDerivativeOperatorTypeII(x0=x0, nx=nx, dx=dx, format=format)
         # multiply by 3 because 6*f[xi-1,xi,xi+1] means 3 * [f(xi+1) - 2 * f(xi) + f(xi-1)] / (hi**2)
         self.second_derivativor.operator = 3. * self.second_derivativor.operator
@@ -186,18 +193,16 @@ class CubicInterpolator1d:
                 # TODO : avoid searchorted, the grid is regular!
                 k = np.searchsorted(self.x, self.xi[i], side="right")
                 assert self.x[k-1] <= self.xi[i] < self.x[k]
-                hk = (self.x[k] - self.x[k-1])
-                assert hk > 0
 
                 x = self.xi[i]  # evaluation point
 
                 rows.append(i)
                 cols.append(k-1)
-                vals.append((self.x[k] - x)**3. / (6. * hk) - hk * (self.x[k] - x) / 6.)
+                vals.append((self.x[k] - x)**3. / (6. * self.dx) - self.dx * (self.x[k] - x) / 6.)
 
                 rows.append(i)
                 cols.append(k)
-                vals.append((x - self.x[k-1])**3. / (6. * hk) - hk * (x - self.x[k-1]) / 6.)
+                vals.append((x - self.x[k-1])**3. / (6. * self.dx) - self.dx * (x - self.x[k-1]) / 6.)
             else:
                 # otherwise the interpolation will be 0, add a fictive row in the linear operator
                 pass
@@ -223,9 +228,9 @@ class CubicInterpolator1d:
 if __name__ == "__main__":
 
     x = np.linspace(0.1, 0.9, 10)
-    xi = np.linspace(0., 1.0, 1000)
+    xi = np.linspace(-0.1, 1.1, 1000)
 
-    P = LinearInterpolator1d(x=x, xi=xi)
+    P = LinearInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
     C = CubicInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
 
     f = np.random.randn(len(x))
@@ -245,7 +250,7 @@ if __name__ == "__main__":
     x = np.linspace(0.1, 0.9, 100)
     xi = x * (1. + 0.01)
 
-    P = LinearInterpolator1d(x=x, xi=xi)
+    P = LinearInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
     C = CubicInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
 
     f = np.sin(2. * np.pi * x / 0.1)
