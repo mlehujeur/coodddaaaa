@@ -222,6 +222,8 @@ class CubicInterpolator1d:
 
         return self.eq1_operator * m + self.linear_interpolator.operator * f
 
+    # TODO : add method to export/reload from npz file
+
 
 if __name__ == "__main__":
 
