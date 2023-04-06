@@ -27,6 +27,7 @@ class LinearInterpolator1d(object):
         :param xi: the points where we need the interpolated values  => f(xi) is computed by self.__call__
         :param format: format to use for the linear operator
         """
+        # TODO : go back to a regular grid, take x0, nx, dx in arguments to make sure the user is aware of this constraint
         assert x.ndim == 1
         assert (x[1:] > x[:-1]).all()
         assert xi.ndim == 1
@@ -36,7 +37,7 @@ class LinearInterpolator1d(object):
         if format == "csc":
             _sp_matrix = sp.csc_matrix
         elif format == "csr":
-            _sp_matrix = sp.csr_matrix
+            _sp_matrix = sp.csr_matrix  # TODO useful?
         else:
             raise ValueError
 
@@ -48,6 +49,7 @@ class LinearInterpolator1d(object):
         xmin, xmax = x.min(), x.max()
         for i in range(len(self.xi)):
             if xmin < self.xi[i] < xmax:
+                # TODO : avoid searchorted
                 k = np.searchsorted(self.x, self.xi[i], side="right")
                 assert self.x[k-1] <= self.xi[i] < self.x[k]
 
@@ -168,14 +170,14 @@ class CubicInterpolator1d:
         lower_diag[-1] = upper_diag[0] = 0.  # type II boundary condition
         a = sp.diags((lower_diag, diag, upper_diag), offsets=(-1, 0, 1), format=format)
         # inverse_of_a = splinalg.inv(a)  #=> dense
-        self.solver = splinalg.splu(a)
+        self.solver = splinalg.splu(a)  # TODO : CORRECT? / OPTIMAL?
 
         # ==== Implement the operator for equation (1), with respect to Mis coefficients
         #      the missing terms for yi and yi+1 are included in the linear_operator term
         if format == "csc":
             _sp_matrix = sp.csc_matrix
         elif format == "csr":
-            _sp_matrix = sp.csr_matrix
+            _sp_matrix = sp.csr_matrix  # Useful?
         else:
             raise ValueError
 
@@ -186,6 +188,7 @@ class CubicInterpolator1d:
         xmin, xmax = self.x.min(), self.x.max()
         for i in range(len(self.xi)):
             if xmin < self.xi[i] < xmax:
+                # TODO : avoid searchorted, the grid is regular!
                 k = np.searchsorted(self.x, self.xi[i], side="right")
                 assert self.x[k-1] <= self.xi[i] < self.x[k]
                 hk = (self.x[k] - self.x[k-1])
