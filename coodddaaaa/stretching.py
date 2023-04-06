@@ -47,7 +47,7 @@ class Stretcher:
         # compute the interpolation operator once for all (based on scipy.sparse matrices)
         if interp_kind == "linear":
             self.interpolator = LinearInterpolator1d(
-                x=self.t,  # nodes
+                x0=t0, nx=nt, dx=dt,  # nodes
                 xi=self.stretch_time.flat[:],  # interpolation points
                 )
 

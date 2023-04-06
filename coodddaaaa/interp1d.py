@@ -174,6 +174,7 @@ class CubicInterpolator1d(LinearInterpolator1d):
 
         # ==== Implement the operator for equation (1), with respect to Mis coefficients
         #      the missing terms for yi and yi+1 are included in the self.lininterp_operator term
+        x = np.arange(nx) * dx + x0
 
         # nodes before the interpolation points
         rows1 = self._idx_xi_to_interp
