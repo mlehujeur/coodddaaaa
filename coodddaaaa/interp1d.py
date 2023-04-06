@@ -44,28 +44,21 @@ class LinearInterpolator1d(object):
         self.dx = dx
         self.xi = xi
 
-        ni = len(xi)  # numb of interp poinst
-        x = np.arange(nx) * dx + x0  # nodes
-        xmin, xmax = x.min(), x.max()  # interp bounds
+        # nodes
+        x = np.arange(nx) * dx + x0
 
-        # find indexs of x of nodes located after the interp points xi
-        k = np.ceil((xi - xmin) / dx).astype(int)
-
-        # find the interp points that occur within the interp bounds
-        m = (k > 0) & (k < nx)  # mask
-        m = np.arange(len(xi))[m]  # to indexs
-        km = k[m]  # eliminate the interp points out of bounds => interp will return 0 for these nodes
-        xim = xi[m]  # same
+        idx_xi_to_interp, idx_x_after_interp_points = \
+            self._find_interp_points_in_grid(x0, nx, dx, xi)
 
         # nodes before the interpolation points
-        rows1 = m
-        cols1 = km - 1
-        vals1 = (x[km] - xim) / self.dx
+        rows1 = idx_xi_to_interp
+        cols1 = idx_x_after_interp_points - 1
+        vals1 = (x[idx_x_after_interp_points] - xi[idx_xi_to_interp]) / self.dx
 
         # nodes after the interpolation points
-        rows2 = m
-        cols2 = km
-        vals2 = (xim - x[km-1]) / self.dx
+        rows2 = idx_xi_to_interp
+        cols2 = idx_x_after_interp_points
+        vals2 = (xi[idx_xi_to_interp] - x[idx_x_after_interp_points-1]) / self.dx
 
         # assemble
         self.operator = _sp_matrix(
@@ -73,7 +66,22 @@ class LinearInterpolator1d(object):
              (np.concatenate((rows1, rows2)),
               np.concatenate((cols1, cols2)))
              ),
-            shape=(ni, nx))
+            shape=(len(self.xi), self.nx))
+
+    def _find_interp_points_in_grid(self, x0: float, nx: int, dx: float, xi: np.ndarray):
+
+        # find indexs of x of nodes located after the interp points xi
+        k = np.ceil((xi - x0) / dx).astype(int)
+
+        # find the interp points that occur within the interp bounds
+        m = (k > 0) & (k < nx)  # mask
+        idx_xi_to_interp = np.arange(len(xi))[m]  # to indexs
+
+        # eliminate the interp points out of bounds
+        # => interp will return 0 for these points
+        idx_x_after_interp_points = k[idx_xi_to_interp]
+
+        return idx_xi_to_interp, idx_x_after_interp_points
 
     def __call__(self, f: np.ndarray):
         """
