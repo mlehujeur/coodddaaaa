@@ -102,31 +102,26 @@ class SecondDerivativeOperatorTypeII:
         else:
             raise ValueError
 
-        rows, cols, vals = [], [], []
-        idx2 = dx**-2.
-        for k in range(nx):
-            if k == 0:
-                # # left edge, use a fourth point shifted scheme
-                # rows += [k, k, k, k]
-                # cols += [k, k + 1, k + 2, k + 3]
-                # vals += [2.*idx2, -5.*idx2, 4.*idx2, -1.*idx2]
-                pass  # for type II boundary condition => d[0] = 2 * f''0 = 0
+        idx2 = dx ** -2.
 
-            elif k == nx - 1:
-                # # right edge, use a fourth point shifted scheme
-                # rows += [k, k, k, k]
-                # cols += [k - 3, k - 2, k - 1, k]
-                # vals += [-1.*idx2, 4.*idx2, -5.*idx2, 2.*idx2]
-                pass  # for type II boundary condition => d[-1] = 2 * f''[-1] = 0
-            else:
-                # center scheme
-                rows += [k, k, k]
-                cols += [k - 1, k, k + 1]
-                vals += [1.*idx2, -2.*idx2, 1.*idx2]
+        # do not fill rows 0 and nx - 1
+        # for type II boundary condition
+        # d[0] = 2 * f''0 = 0
+        # d[-1] = 2 * f''[-1] = 0
+        diag = np.zeros(nx)
+        diag[1:-1] = -2. * idx2
 
-        self.operator = _sp_matrix(
-            (vals, (rows, cols)),
-            shape=(nx, nx))
+        upper_diag = np.zeros(nx - 1)
+        upper_diag[1:] = idx2
+
+        lower_diag = np.zeros(nx - 1)
+        lower_diag[:-1] = idx2
+        self.operator = sp.diags(
+            (lower_diag, diag, upper_diag),
+            offsets=(-1, 0, 1),
+            shape=(nx, nx),
+            format=format,
+            )
 
     def __call__(self, f: np.ndarray):
         """
