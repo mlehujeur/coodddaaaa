@@ -85,14 +85,17 @@ class Stretcher:
 
         return x_stretched
 
-    def corr(self, x: np.ndarray, x_stretched: np.ndarray) -> np.ndarray:
+    def corr1d(self, x: np.ndarray, x_stretched: np.ndarray) -> np.ndarray:
         """
         Stretching correlation of x with a basis of stretched versions of the reference signal
-        :param x: signal to be correlated, np.ndarray, 1d, shape (nt, )
+        :param x: signal(s) to be correlated to the reference, np.ndarray, 1d, shape (nt, )
         :param x_stretched: stretched reference from self.stretch, np.ndarray, 2d, shape (neps, nt, )
+        :return c: correlation function np.ndarray, 1d, shape (neps, )
         """
+        assert x.ndim == 1, f'Dimension Error : x must be 1 trace of shape (nt={self.nt}, )'
+        assert x.shape == (self.nt, ), f'Shape Error : x must be 1 trace of shape (nt={self.nt}, )'
 
-        c = x_stretched.dot(x) * self.dt
+        c = x_stretched.dot(x) * self.dt  # np.ndarray, shape (neps, )
 
         if self.norm:
             # the normalization relative to x_stretched
@@ -100,6 +103,34 @@ class Stretcher:
             c /= x.dot(x) ** 0.5 * self.dt
 
         return c
+
+    def corr2d(self, x: np.ndarray, x_stretched: np.ndarray) -> np.ndarray:
+        """
+        Stretching correlation of x with a basis of stretched versions of the reference signal
+        :param x: signal(s) to be correlated to the reference, np.ndarray, 2d, shape (ntraces, nt)
+        :param x_stretched: stretched reference from self.stretch, np.ndarray, 2d, shape (neps, nt, )
+        :return c: correlation function np.ndarray, 2d, shape (neps, ntraces)
+        """
+        assert x.ndim == 2, f'Dimension Error : x must be a bscan of shape (ntraces, nt={self.nt})'
+        assert x.shape[1] == self.nt, f'Shape Error : x must be a bscan of shape (ntraces, nt={self.nt})'
+
+        c = x_stretched.dot(x.T) * self.dt  # np.ndarray, 2d, shape (neps, ntraces)
+
+        if self.norm:
+            # the normalization relative to x_stretched
+            # is already done
+            # divide each column of c (i.e. the correlation for each trace) by the normalization constant of the trace
+            c /= (x * x).sum(axis=1) ** 0.5 * self.dt  # shape (ntraces, )
+
+        return c
+
+    def corr(self, x, x_stretched):
+        if x.ndim == 1:
+            return self.corr1d(x, x_stretched)
+        elif x.ndim == 2:
+            return self.corr2d(x, x_stretched)
+        else:
+            raise Exception
 
     def corrmax(self, c: np.ndarray) -> (float, float):
         """
