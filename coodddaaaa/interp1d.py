@@ -8,13 +8,16 @@ to interpolate functions on the same grids many times
 note I do not use the scipy interpolator
 because I need an interpolator that can be created from the grids only
 and called later on with the function to interpolate
+
+2023.04.07 : P. Mora : Speed up the construction of the sparse matrixes => x20 to x50
 """
 
-import math
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import sparse as sp
 from scipy.sparse import linalg as splinalg
+
+SPMATRIXFORMAT = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}
 
 
 class LinearInterpolator1d:
@@ -38,8 +41,6 @@ class LinearInterpolator1d:
         :param format: format to use for the linear operator
         """
 
-        _sp_matrix = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}[format]
-
         self.x0 = x0
         self.nx = nx
         self.dx = dx
@@ -60,16 +61,15 @@ class LinearInterpolator1d:
         # nodes after the interpolation points
         rows2 = rows1  # self._idx_xi_to_interp
         cols2 = self._idx_x_after_interp_points
-        #dxbefore = (xi[self._idx_xi_to_interp] - x[self._idx_x_after_interp_points - 1])
-        vals2 = 1. - vals1 #dxbefore / self.dx
+        vals2 = 1. - vals1  # dxbefore / self.dx
 
-        rows = np.concatenate((rows1, rows2))  # np.repeat(r_, 2)
-        cols = np.concatenate((cols1, cols2))  # np.array([k_-1, k_]).T.flatten()
-        vals = np.concatenate((vals1, vals2))  # np.array([v1, 1-v1]).T.flatten()
+        rows = np.concatenate((rows1, rows2))
+        cols = np.concatenate((cols1, cols2))
+        vals = np.concatenate((vals1, vals2))
 
         # assemble
         self.lininterp_operator = \
-            _sp_matrix(
+            SPMATRIXFORMAT[format](
                 (vals, (rows, cols)),
                 shape=(len(self.xi), self.nx))
 
@@ -188,7 +188,7 @@ class CubicInterpolator1d(LinearInterpolator1d):
 
         # assemble
         self.cubinterp_operator = \
-            _sp_matrix(
+            SPMATRIXFORMAT[format](
                 (vals, (rows, cols)),
                 shape=(len(self.xi), self.nx))
 
