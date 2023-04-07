@@ -10,29 +10,34 @@ because I need an interpolator that can be created from the grids only
 and called later on with the function to interpolate
 """
 
+import math
+import numpy as np
 import matplotlib.pyplot as plt
 from scipy import sparse as sp
 from scipy.sparse import linalg as splinalg
-import numpy as np
 
 
-class LinearInterpolator1d(object):
+class LinearInterpolator1d:
     """
     Linear interpolation operator 
     """
     
-    def __init__(self, x0: float, nx: int, dx: float, xi: np.ndarray, format: str ="csc"):
+    def __init__(
+            self,
+            x0: float, nx: int, dx: float,
+            xi: np.ndarray,
+            format: str ="csc"):
         """
         x is the grid at which the function will be defined (nodes)
         xi are the points where the function will be interpolated
         :param x0: x of first sample
         :param nx: number of samples
         :param dx: sampling interval
-        :param xi: the points where we need the interpolated values  => f(xi) is computed by self.__call__
+        :param xi: the points where we need the interpolated values
+            => f(xi) is computed by self.__call__
         :param format: format to use for the linear operator
         """
 
-        assert format in ['csc', 'csr']
         _sp_matrix = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}[format]
 
         self.x0 = x0
@@ -53,18 +58,20 @@ class LinearInterpolator1d(object):
         vals1 = dxafter / self.dx
 
         # nodes after the interpolation points
-        rows2 = self._idx_xi_to_interp
+        rows2 = rows1  # self._idx_xi_to_interp
         cols2 = self._idx_x_after_interp_points
-        dxbefore = (xi[self._idx_xi_to_interp] - x[self._idx_x_after_interp_points - 1])
-        vals2 = dxbefore / self.dx
+        #dxbefore = (xi[self._idx_xi_to_interp] - x[self._idx_x_after_interp_points - 1])
+        vals2 = 1. - vals1 #dxbefore / self.dx
+
+        rows = np.concatenate((rows1, rows2))  # np.repeat(r_, 2)
+        cols = np.concatenate((cols1, cols2))  # np.array([k_-1, k_]).T.flatten()
+        vals = np.concatenate((vals1, vals2))  # np.array([v1, 1-v1]).T.flatten()
 
         # assemble
-        self.lininterp_operator = _sp_matrix(
-            (np.concatenate((vals1, vals2)),
-             (np.concatenate((rows1, rows2)),
-              np.concatenate((cols1, cols2)))
-             ),
-            shape=(len(self.xi), self.nx))
+        self.lininterp_operator = \
+            _sp_matrix(
+                (vals, (rows, cols)),
+                shape=(len(self.xi), self.nx))
 
     def find_interp_points_in_grid(self, x0: float, nx: int, dx: float, xi: np.ndarray):
 
@@ -104,31 +111,15 @@ class SecondDerivativeOperatorTypeII:
         :param dx: sampling interval between nodes
         :param format: format of the sparse operator
         """
-        # self.x = x0 + np.arange(nx) * dx  # not needed
-
-        assert format in ['csc', 'csr']
-        _sp_matrix = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}[format]
 
         idx2 = dx ** -2.
-
-        # do not fill rows 0 and nx - 1
-        # for type II boundary condition
-        # d[0] = 2 * f''0 = 0
-        # d[-1] = 2 * f''[-1] = 0
-        diag = np.zeros(nx)
-        diag[1:-1] = -2. * idx2
-
-        upper_diag = np.zeros(nx - 1)
-        upper_diag[1:] = idx2
-
-        lower_diag = np.zeros(nx - 1)
-        lower_diag[:-1] = idx2
-        self.operator = sp.diags(
-            (lower_diag, diag, upper_diag),
-            offsets=(-1, 0, 1),
-            shape=(nx, nx),
-            format=format,
-            )
+        self.operator = sp.diags([1, -2, 1], [-1, 0, 1], shape=(nx, nx), format=format) * idx2
+        # for type II boundary condition => d[0] = 2 * f''0 = 0
+        self.operator[0, 0] = 0
+        self.operator[0, 1] = 0
+        # for type II boundary condition => d[-1] = 2 * f''[-1] = 0
+        self.operator[-1, -1] = 0
+        self.operator[-1, -2] = 0
 
     def __call__(self, f: np.ndarray):
         """
@@ -142,7 +133,11 @@ class SecondDerivativeOperatorTypeII:
 
 
 class CubicInterpolator1d(LinearInterpolator1d):
-    def __init__(self, x0: float, nx: int, dx: float, xi: np.ndarray, format: str ="csc"):
+    def __init__(
+            self,
+            x0: float, nx: int, dx: float,
+            xi: np.ndarray,
+            format: str ="csc"):
         """
         Lagrange Cubic interpolation with boundary type II from https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
         Works only on a regular grid for now
@@ -156,7 +151,6 @@ class CubicInterpolator1d(LinearInterpolator1d):
         """
 
         LinearInterpolator1d.__init__(self, x0=x0, nx=nx, dx=dx, xi=xi, format=format)
-        assert format in ['csc', 'csr']
         _sp_matrix = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}[format]
 
         # ==== add more internal operators to move to cubic interpolation
@@ -188,13 +182,15 @@ class CubicInterpolator1d(LinearInterpolator1d):
         dxbefore = (xi[self._idx_xi_to_interp] - x[self._idx_x_after_interp_points-1])
         vals2 = dxbefore ** 3. / (6. * self.dx) - self.dx * dxbefore / 6.
 
+        rows = np.concatenate((rows1, rows2))  # np.repeat(r_, 2)
+        cols = np.concatenate((cols1, cols2))  # np.array([k_-1, k_]).T.flatten()
+        vals = np.concatenate((vals1, vals2))  # np.array([v1, 1-v1]).T.flatten()
+
         # assemble
-        self.cubinterp_operator = _sp_matrix(
-            (np.concatenate((vals1, vals2)),
-             (np.concatenate((rows1, rows2)),
-              np.concatenate((cols1, cols2)))
-             ),
-            shape=(len(self.xi), nx))
+        self.cubinterp_operator = \
+            _sp_matrix(
+                (vals, (rows, cols)),
+                shape=(len(self.xi), self.nx))
 
     def __call__(self, f):
 
