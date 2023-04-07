@@ -3,8 +3,8 @@ import setuptools
 
 setuptools.setup(
     name="coodddaaaa",
-    version="0.2",
-    author="Maximilien Lehujeur",
+    version="1.0",
+    author="Maximilien Lehujeur / Pierric Mora",
     author_email="maximilien.lehujeur@univ-eiffel.fr",
     description="Coda stretching",
     long_description="",
@@ -19,7 +19,5 @@ setuptools.setup(
     python_requires='>=3.7',
     install_requires=[
         'numpy', 'scipy', 'matplotlib', 
-        # 'ipython', 'pytest',
-        # 'jupyter',
         ],
     scripts=[])
