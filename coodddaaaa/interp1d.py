@@ -24,7 +24,7 @@ class LinearInterpolator1d:
     """
     Linear interpolation operator 
     """
-    
+
     def __init__(
             self,
             x0: float, nx: int, dx: float,
@@ -72,7 +72,7 @@ class LinearInterpolator1d:
             SPMATRIXFORMAT[format](
                 (vals, (rows, cols)),
                 shape=(len(self.xi), self.nx))
-
+   
     def find_interp_points_in_grid(self, x0: float, nx: int, dx: float, xi: np.ndarray):
 
         # find indexs of x of nodes located after the interp points xi
@@ -133,6 +133,7 @@ class SecondDerivativeOperatorTypeII:
 
 
 class CubicInterpolator1d(LinearInterpolator1d):
+
     def __init__(
             self,
             x0: float, nx: int, dx: float,
@@ -164,7 +165,7 @@ class CubicInterpolator1d(LinearInterpolator1d):
         lower_diag[-1] = upper_diag[0] = 0.  # type II boundary condition
         a = sp.diags((lower_diag, diag, upper_diag), offsets=(-1, 0, 1), format=format)
         # inverse_of_a = splinalg.inv(a)  #=> dense
-        self.solver = splinalg.splu(a)  # TODO : CORRECT? / OPTIMAL?
+        self.solver = splinalg.splu(a)  # => time cost is negligible (0.4%)
 
         # ==== Implement the operator for equation (1), with respect to Mis coefficients
         #      the missing terms for yi and yi+1 are included in the self.lininterp_operator term

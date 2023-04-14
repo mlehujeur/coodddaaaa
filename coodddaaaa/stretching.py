@@ -240,3 +240,28 @@ class Stretcher:
         rmse *= np.sqrt((6 * T * np.sqrt(np.pi / 2.)) / (wc ** 2. * (tmax ** 3 - tmin ** 3)))
 
         return rmse
+
+
+if __name__ == "__main__":
+    from coodddaaaa.utils import Timer, polyspace
+
+    with Timer('constructor'):
+        st = Stretcher(
+            nt=16384,
+            dt=1e-8,
+            t0=0.,
+            eps=polyspace(-0.01, 0.01, 2000, pwr=2.0),
+            interp_kind="cubic",
+            )
+
+    x=np.random.randn(st.nt)
+    with Timer('stretch'):
+        x_stretched = st.stretch(x)
+
+    with Timer('corr'):
+        c = st.corr(x, x_stretched)
+
+    with Timer('hypermax'):
+        epsmax, cmax = st.corrmax(c)
+
+
