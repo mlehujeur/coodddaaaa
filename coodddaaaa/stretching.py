@@ -79,8 +79,13 @@ class Stretcher:
             # instead of doing it in the correlation
             # => WARNING : this will affect the amplitudes of the stretched data
             #              for stretching only, user must use norm=False
-            norm = (x_stretched * x_stretched).sum(axis=1) ** -0.5
+
             # norm = np.linalg.norm(x_stretched, axis=1)
+            norm = (x_stretched ** 2).sum(axis=1) ** -0.5
+
+            # NB : I've tried Numba (this ref) => no gain at all
+            # https://stackoverflow.com/questions/30437947/
+            # most-memory-efficient-way-to-compute-abs2-of-complex-numpy-ndarray
 
             x_stretched *= norm[:, np.newaxis]
 
@@ -98,10 +103,12 @@ class Stretcher:
             or 2d, shape (neps, ntraces) if x is 2d
         """
         if x.ndim == 1:
-            assert x.shape == (self.nt, ), f'Shape Error : x must be 1 trace of shape (nt={self.nt}, )'
+            assert x.shape == (self.nt, ), \
+                f'Shape Error : x must be 1 trace of shape (nt={self.nt}, )'
 
         elif x.ndim == 2:
-            assert x.shape[1] == self.nt, f'Shape Error : x must be a bscan of shape (ntraces, nt={self.nt})'
+            assert x.shape[1] == self.nt, \
+                f'Shape Error : x must be a bscan of shape (ntraces, nt={self.nt})'
 
         else:
             raise ValueError('Shape Error, x must be 1d (for single signal) or 2d (for a bscan)')
@@ -247,14 +254,14 @@ if __name__ == "__main__":
 
     with Timer('constructor'):
         st = Stretcher(
-            nt=16384,
+            nt=4096,
             dt=1e-8,
             t0=0.,
-            eps=polyspace(-0.01, 0.01, 2000, pwr=2.0),
+            eps=polyspace(-0.01, 0.01, 200, pwr=2.0),
             interp_kind="cubic",
             )
 
-    x=np.random.randn(st.nt)
+    x = np.random.randn(st.nt)
     with Timer('stretch'):
         x_stretched = st.stretch(x)
 
@@ -264,4 +271,19 @@ if __name__ == "__main__":
     with Timer('hypermax'):
         epsmax, cmax = st.corrmax(c)
 
+    x = np.random.randn(123, st.nt)
+    with Timer('corr_all_with_all'):
+        c_triu, e_triu = st.corr_all_with_all(data=x)
 
+    with Timer('triu2dense x2'):
+        c = st.triu2dense(c_triu, True, 1.0)
+        e = st.triu2dense(e_triu, False, 0.0)
+
+    """
+    Timer[constructor]: 312.93 ms
+    Timer[stretch]: 12.13 ms
+    Timer[corr]: 0.33 ms
+    Timer[hypermax]: 0.10 ms
+    Timer[corr_all_with_all]: 2904.68 ms
+    Timer[triu2dense x2]: 7.41 ms
+    """
