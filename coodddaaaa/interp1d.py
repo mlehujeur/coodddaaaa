@@ -152,7 +152,7 @@ class CubicInterpolator1d(LinearInterpolator1d):
         """
 
         LinearInterpolator1d.__init__(self, x0=x0, nx=nx, dx=dx, xi=xi, format=format)
-        _sp_matrix = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}[format]
+        _sp_matrix = SPMATRIXFORMAT[format]
 
         # ==== add more internal operators to move to cubic interpolation
         # multiply by 3 because 6*f[xi-1,xi,xi+1] means 3 * [f(xi+1) - 2 * f(xi) + f(xi-1)] / (hi**2)
@@ -212,17 +212,23 @@ class CubicInterpolator1d(LinearInterpolator1d):
 
 if __name__ == "__main__":
 
-    x = np.linspace(0.1, 0.9, 10)
-    xi = np.linspace(-0.1, 1.1, 1000)
+    # ========================= simple interpolation test
+    # build the grids
+    x = np.linspace(0.1, 0.9, 10)  # the nodes
+    xi = np.linspace(-0.1, 1.1, 1000)  # the interpolation points
 
+    # build the linear operators
     P = LinearInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
     C = CubicInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
 
+    # pick some random values to attach to the nodes
     f = np.random.randn(len(x))
 
+    # call the operators for these values
     pi = P(f)
     ci = C(f)
 
+    # compare the output
     if True:
         plt.figure()
         plt.plot(x, f, "ko")
@@ -231,7 +237,7 @@ if __name__ == "__main__":
         plt.gca().legend()
         plt.show()
 
-    # ========================= stretcher
+    # ========================= interpolation for stretching
     x = np.linspace(0.1, 0.9, 100)
     xi = x * (1. + 0.01)
 
@@ -248,5 +254,25 @@ if __name__ == "__main__":
         plt.plot(x, f, "k")
         plt.plot(x, pi, 'r-', label='linear')
         plt.plot(x, ci, 'g-', label='cubic')
+        plt.gca().legend()
+        plt.show()
+
+    # ========================= interpolation of many signals at ones
+    x = np.linspace(0.1, 0.9, 10)  # the nodes
+    xi = np.linspace(-0.1, 1.1, 1000)  # the interpolation points
+
+    P = LinearInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
+    C = CubicInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
+
+    f = 0.2 * np.random.randn(10, len(x))
+    pi = P(f.T).T
+    ci = C(f.T).T
+
+    if True:
+        plt.figure()
+        for n in range(f.shape[0]):
+            plt.plot(x, f[n, :] + n, "ko")
+            plt.plot(xi, pi[n, :] + n, 'r-', label='linear' if not n else None)
+            plt.plot(xi, ci[n, :] + n, 'g-', label='cubic' if not n else None)
         plt.gca().legend()
         plt.show()
