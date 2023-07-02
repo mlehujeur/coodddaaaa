@@ -12,7 +12,7 @@ TODO : use scipy.fft => parallel
 
 from typing import Optional
 from scipy.signal import butter, sosfilt, sosfiltfilt, sosfreqz
-from scipy.fftpack import fftfreq, rfftfreq, rfft, irfft, fft, ifft, fft2, ifft2
+from scipy.fftpack import fftfreq, fft, ifft, fft2, ifft2
 import numpy as np
 
 
@@ -72,6 +72,9 @@ class ButterworthFilter(object):
             # freqs, response = sosfreqz(self._sos, worN=npts, whole=True, fs=self._sampling_rate)
 
         elif input_domain == "rfft":
+            raise Exception(
+                'warning : the behavior of scipy.fftpack.rfft '
+                'differs from scipy.fft.rfft')
             freqs = rfftfreq(npts, 1. / self._sampling_rate)
 
         else:
@@ -93,6 +96,9 @@ class ButterworthFilter(object):
                 filtered_tfdata = fft(filtered_data)
 
             elif input_domain == "rfft":
+                raise Exception(
+                    'warning : the behavior of scipy.fftpack.rfft '
+                    'differs from scipy.fft.rfft')
                 # freqs = fftfreq(npts, 1. / self._sampling_rate)
                 tfdata = rfft(data)
                 filtered_tfdata = rfft(filtered_data)
@@ -130,6 +136,9 @@ class ButterworthFilter(object):
         elif input_domain in ["fft", "rfft"]:
 
             if input_domain == "rfft" and zerophase is False:
+                raise Exception(
+                    'warning : the behavior of scipy.fftpack.rfft '
+                    'differs from scipy.fft.rfft')
                 raise ValueError(f"{input_domain=}, {zerophase=} => complex => irfft not applicable")
 
             _, response = self.response(
