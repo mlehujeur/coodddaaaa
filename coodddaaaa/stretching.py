@@ -186,6 +186,7 @@ class Stretcher:
 
         n = 0
         for i in range(ntraces - 1):
+            print(f'{i+1}/{ntraces - 1}')
             # stretch new reference
             y = data[i, :]
             y_stretched = self.stretch(y)

@@ -200,6 +200,7 @@ class HighpassFilter(ButterworthFilter):
 
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
     from scipy.signal.windows import tukey
 
     npts = 1200
@@ -213,7 +214,6 @@ if __name__ == '__main__':
 
     bp = BandpassFilter(freqmin=freqmin, freqmax=freqmax, sampling_rate=sampling_rate, order=4)
 
-    import matplotlib.pyplot as plt
     bp.show(plt.figure(), zerophase=False)
     bp.show(plt.figure(), zerophase=True)
 
