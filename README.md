@@ -6,3 +6,6 @@ Coda stretching in python
 ```bash 
 pip install .
 ```
+
+### Examples
+see an example in `./examples/000_examples.ipynb`
