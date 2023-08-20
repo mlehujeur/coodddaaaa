@@ -1,5 +1,5 @@
 """
-Copyright (c) 2023 maximilien.lehujeur
+SOURCE : sigy 1.5.3, M.L. 20/08/2023
 
 Fourier domain oversampling, for the sake of simplicity, 
 this program can increase the number of samples only by 2**n, where n is an integer.
