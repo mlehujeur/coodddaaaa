@@ -16,6 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import sparse as sp
 from scipy.sparse import linalg as splinalg
+from scipy.fftpack import rfft  # NOT scipy.fft.rfft !!!
 
 SPMATRIXFORMAT = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}
 
@@ -210,6 +211,50 @@ class CubicInterpolator1d(LinearInterpolator1d):
     # TODO : add method to export/reload from npz file
 
 
+class RFFTInterpolator1d:
+    def __init__(
+            self, 
+            x0: float, nx: int, dx: float,
+            xi: np.ndarray):
+
+        self.x0 = x0
+        self.nx = nx
+        self.dx = dx
+        self.xi = xi
+
+        npts = nx
+        fnfft = npts
+        two_pi = 2.0 * np.pi
+
+        n = (xi - x0) / ((nx - 1) * dx) * (npts - 1)
+
+        k = np.arange(npts)[:, np.newaxis]
+        b = np.zeros((npts, len(xi)))
+        b[0, :] = 1.0
+
+        if npts % 2:
+            b[1:npts:2] = +2.0 * np.cos(two_pi * n * k[1:(npts - 1) // 2 + 1, :] / fnfft)
+            b[2:npts:2] = -2.0 * np.sin(two_pi * n * k[1:(npts - 1) // 2 + 1, :] / fnfft)
+
+        else:
+            b[1:npts - 1:2] = +2.0 * np.cos(two_pi * n * k[1:npts // 2, :] / fnfft)
+            b[2:npts - 1:2] = -2.0 * np.sin(two_pi * n * k[1:npts // 2, :] / fnfft)
+            b[-1, :] = +1.0 * np.cos(two_pi * n * npts / fnfft / 2.)
+
+        b *= 1.0 / fnfft
+        self._irfft_basis = b
+
+    def __call__(self, f: np.ndarray):
+        """
+        affect function values at x and return the interpolated values at xi
+        """
+        # assert isinstance(f, np.ndarray)
+        # assert f.ndim == 1
+        # assert len(f) == len(self.x)
+
+        return rfft(f, axis=-1).dot(self._irfft_basis)
+
+
 if __name__ == "__main__":
 
     # ========================= simple interpolation test
@@ -220,13 +265,14 @@ if __name__ == "__main__":
     # build the linear operators
     P = LinearInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
     C = CubicInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
-
+    F = RFFTInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
     # pick some random values to attach to the nodes
     f = np.random.randn(len(x))
 
     # call the operators for these values
     pi = P(f)
     ci = C(f)
+    fi = F(f)
 
     # compare the output
     if True:
@@ -234,6 +280,7 @@ if __name__ == "__main__":
         plt.plot(x, f, "ko")
         plt.plot(xi, pi, 'r-', label='linear')
         plt.plot(xi, ci, 'g-', label='cubic')
+        plt.plot(xi, fi, 'm-', label='Fourier')
         plt.gca().legend()
         plt.show()
 
@@ -243,17 +290,20 @@ if __name__ == "__main__":
 
     P = LinearInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
     C = CubicInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
+    F = RFFTInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
 
     f = np.sin(2. * np.pi * x / 0.1)
 
     pi = P(f)
     ci = C(f)
+    fi = F(f)
 
     if True:
         plt.figure()
         plt.plot(x, f, "k")
         plt.plot(x, pi, 'r-', label='linear')
         plt.plot(x, ci, 'g-', label='cubic')
+        plt.plot(x, fi, 'm-', label='Fourier')
         plt.gca().legend()
         plt.show()
 
@@ -263,10 +313,14 @@ if __name__ == "__main__":
 
     P = LinearInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
     C = CubicInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
+    F = RFFTInterpolator1d(x0=x[0], nx=len(x), dx=x[1] - x[0], xi=xi)
 
     f = 0.2 * np.random.randn(10, len(x))
     pi = P(f.T).T
     ci = C(f.T).T
+    fi = F(f)   # WARNING : Fourier interp is not built the same way as the two other interpolators
+    print(ci.shape)
+    print(fi.shape)
 
     if True:
         plt.figure()
@@ -274,5 +328,6 @@ if __name__ == "__main__":
             plt.plot(x, f[n, :] + n, "ko")
             plt.plot(xi, pi[n, :] + n, 'r-', label='linear' if not n else None)
             plt.plot(xi, ci[n, :] + n, 'g-', label='cubic' if not n else None)
+            plt.plot(xi, fi[n, :] + n, 'm-', label='Fourier' if not n else None)
         plt.gca().legend()
         plt.show()

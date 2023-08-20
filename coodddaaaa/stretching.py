@@ -2,9 +2,9 @@
 Copyright (c) 2023 maximilien.lehujeur
 """
 
-from typing import Union
+from typing import Union, Optional, Literal
 import numpy as np
-from coodddaaaa.interp1d import LinearInterpolator1d, CubicInterpolator1d
+from coodddaaaa.interp1d import LinearInterpolator1d, CubicInterpolator1d, RFFTInterpolator1d
 from coodddaaaa.hypermax import hypermax
 
 
@@ -20,7 +20,7 @@ class Stretcher:
                  t0: float, dt: float, nt: int,
                  eps: np.ndarray,
                  norm: bool = False,
-                 interp_kind: str = "cubic"):
+                 interp_kind: Literal['linear', "cubic", 'fourier'] = "cubic"):
         """
         :param t0: time of first sample
         :param dt: sampling interval
@@ -30,7 +30,7 @@ class Stretcher:
                      warning : for stretching only, use norm = False
         :param interp_kind: which interpolator to use for stretching
         """
-        assert interp_kind in ['linear', 'cubic']
+        assert interp_kind in ['linear', 'cubic', 'fourier']
 
         self.t0, self.nt, self.dt = t0, nt, dt
         self.eps = eps   # 1d, shape (len(eps), )
@@ -61,6 +61,18 @@ class Stretcher:
                 x0=t0, nx=nt, dx=dt,  # nodes
                 xi=self.stretch_time.flat[:],  # interpolation points
                 )
+
+        elif interp_kind == "fourier":
+            t0 = self.t[0]
+            nt = len(self.t)
+            dt = self.t[1] - self.t[0]
+            assert ((self.t - (np.arange(nt) * dt + t0)) / dt <= 1e-6) .all()
+
+            self.interpolator = RFFTInterpolator1d(
+                x0=t0, nx=nt, dx=dt,  # nodes
+                xi=self.stretch_time.flat[:],  # interpolation points
+                )
+
         else:
             raise ValueError(interp_kind)
 
