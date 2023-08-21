@@ -107,7 +107,7 @@ if __name__ == '__main__':
     y *= taper  
 
     # oversamp
-    t1, y1 = oversamp(t0=t0, dt=dt, data=y, npow2=1, axis=-1, demean=True)
+    t1, y1 = oversamp(t0=t0, dt=dt, data=y, npow2=4, axis=-1, demean=True)
 
     plt.figure()
     plt.plot(t, y, 'ko-')

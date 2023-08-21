@@ -225,6 +225,6 @@ if __name__ == '__main__':
     plt.plot(data, 'k')
     plt.plot(bp(data, zerophase=True), "b", linewidth=3)
     plt.plot(ifft(bp(fft(data), zerophase=True, input_domain="fft")).real, "g-")
-    plt.plot(irfft(bp(rfft(data), zerophase=True, input_domain="rfft")).real, "m--")
+    # plt.plot(irfft(bp(rfft(data), zerophase=True, input_domain="rfft")).real, "m--")
 
     plt.show()
