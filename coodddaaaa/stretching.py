@@ -6,6 +6,7 @@ from typing import Union, Optional, Literal
 import numpy as np
 from coodddaaaa.interp1d import LinearInterpolator1d, CubicInterpolator1d, RFFTInterpolator1d
 from coodddaaaa.hypermax import hypermax
+from scipy.sparse import block_diag
 
 
 class Stretcher:
@@ -260,6 +261,47 @@ class Stretcher:
         rmse *= np.sqrt((6 * T * np.sqrt(np.pi / 2.)) / (wc ** 2. * (tmax ** 3 - tmin ** 3)))
 
         return rmse
+
+
+class InverseStretcher:
+    """
+    An object to cancel the effect of the stretching on each trace of a bscan
+    for example
+        you have a bscan of 256 traces with n samples each, bscan is a 2d array shapped (256, n)
+        you have an estimate of the stretching history, i.e. 256 epsilon values in an 1D array
+
+        this object returns the bscan corrected from the estimated stretching values
+            positive epsilon values (i.e. positive dv/v) mean that the trace was compressed relative to its ref, so this operator stretch it
+            negative epsilon values will tend to compress the waveform
+    """
+    def __init__(self, t0: float, nt: int, dt: float, eps_history: np.ndarray, interp_kind: Literal['linear'] = "linear"):
+
+        self.t0 = t0
+        self.nt = nt
+        self.dt = dt
+        self.eps_history = eps_history
+
+        self.time_array = self.t0 + np.arange(self.nt) * self.dt
+        if interp_kind == "linear":
+            block_diagonals = []
+            for eps in eps_history:
+
+                op = LinearInterpolator1d(
+                    x0=self.t0, nx=self.nt, dx=self.dt, xi=self.time_array * (1. + eps))
+
+                op = op.lininterp_operator.T  # transpose to get the inverser interpolator
+
+                block_diagonals.append(op)
+        else:
+            raise NotImplementedError(interp_kind)
+
+        self.interpolator = block_diag(block_diagonals, format="csr")
+
+    def __call__(self, bscan: np.ndarray) -> np.ndarray:
+        assert bscan.shape == (len(self.eps_history), self.nt)
+        ans = np.zeros_like(bscan)
+        ans.flat[:] = self.interpolator * bscan.flat[:]
+        return ans
 
 
 if __name__ == "__main__":
