@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="coodddaaaa",
-    version="1.2",
+    version="1.3",
     author="Maximilien Lehujeur / Pierric Mora",
     author_email="maximilien.lehujeur@univ-eiffel.fr",
     description="Coda stretching",
