@@ -298,7 +298,11 @@ class InverseStretcher:
         self.interpolator = block_diag(block_diagonals, format="csr")
 
     def __call__(self, bscan: np.ndarray) -> np.ndarray:
-        assert bscan.shape == (len(self.eps_history), self.nt)
+        if not bscan.shape == (len(self.eps_history), self.nt):
+            raise ValueError(
+                f'shape error, bscan is {bscan.shape}'
+                f'and should be ({len(self.eps_history)=}, {self.nt=})'
+                )
         ans = np.zeros_like(bscan)
         ans.flat[:] = self.interpolator * bscan.flat[:]
         return ans
