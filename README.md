@@ -10,4 +10,19 @@ pip install .
 ```
 
 ### Examples
-See the jupyter notebooks in `./examples/000_examples.ipynb`
+See the jupyter notebooks in `./examples`
+
+### Documentation
+To generate the documentation, run 
+```bash 
+python setup.py doc
+```
+The documentation pages are now in 
+* ./docs/_build/html/index.html
+* ./examples/_build/html/index.html
+
+```bash 
+xdg-open ./docs/_build/html/index.html & 
+xdg-open ./examples/_build/html/index.html 
+
+```
