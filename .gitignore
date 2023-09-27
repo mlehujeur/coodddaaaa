@@ -4,3 +4,6 @@
 /build/
 /coodddaaaa/__pycache__/
 /examples/.ipynb_checkpoints/
+/docs/_build/
+/docs/_static/
+/docs/_templates/
