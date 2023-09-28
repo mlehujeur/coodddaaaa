@@ -14,11 +14,7 @@ class MakeTheDoc(setuptools.Command):
 
     def run(self):
         subprocess.run(
-            ['cd docs && '
-             'ln -sf ../examples/*.ipynb . &&'
-             'make clean && '
-             'make html '
-             ''], shell=True)
+            ['sphinx-build docs/ docs/_build'], shell=True)
         
 setuptools.setup(
     name="coodddaaaa",
