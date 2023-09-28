@@ -1,5 +1,5 @@
 """
-SOURCE : sigy 1.5.3, M.L. 20/08/2023
+Modified after sigy 1.5.3, M.L. 20/08/2023
 
 Fourier domain oversampling, for the sake of simplicity, 
 this program can increase the number of samples only by 2**n, where n is an integer.
@@ -21,7 +21,8 @@ def oversamp(t0: float, dt: float, data: np.ndarray,
              npow2: int, axis: int = -1, demean: bool = False) \
         -> (np.ndarray, np.ndarray):
     """
-    time domain version of fft_oversamp
+    Time domain version of fft_oversamp
+
     :param t0: start time, sec
     :param dt: sampling interval, sec
     :param data: time domain data array (1d or more)
@@ -29,6 +30,7 @@ def oversamp(t0: float, dt: float, data: np.ndarray,
     :param axis: axis along which to oversample the signal
     :return to: the new time vector
     :return datao: the oversample data
+
     """
     nt = data.shape[axis]
     t_over = t0 + np.arange(nt * 2 ** npow2) * (dt / (2 ** npow2))
@@ -50,7 +52,7 @@ def oversamp(t0: float, dt: float, data: np.ndarray,
 
 def fft_oversamp(fft_data: np.ndarray, npow2: int = 1, axis: int = -1) -> np.ndarray:
     """
-    oversamp a signal by padding it with zeros in the FFT domain
+    Oversamp a signal by padding it with zeros in the FFT domain
     the number of sample is multiplied by 2 ** npow2 (default 2**1)
 
     :param fft_data: output of fft

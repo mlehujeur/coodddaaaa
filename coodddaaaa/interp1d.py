@@ -23,7 +23,14 @@ SPMATRIXFORMAT = {"csc": sp.csc_matrix, "csr": sp.csr_matrix}
 
 class LinearInterpolator1d:
     """
-    Linear interpolation operator 
+    Linear interpolation operator
+
+    :param x0: x coordinate of the first sample
+    :param nx: number of samples
+    :param dx: sampling interval
+    :param xi: the points where we need the interpolated values
+        => f(xi) is computed by self.__call__
+    :param format: format to use for the linear operator
     """
 
     def __init__(
@@ -34,12 +41,6 @@ class LinearInterpolator1d:
         """
         x is the grid at which the function will be defined (nodes)
         xi are the points where the function will be interpolated
-        :param x0: x of first sample
-        :param nx: number of samples
-        :param dx: sampling interval
-        :param xi: the points where we need the interpolated values
-            => f(xi) is computed by self.__call__
-        :param format: format to use for the linear operator
         """
 
         self.x0 = x0
@@ -101,17 +102,19 @@ class LinearInterpolator1d:
 
 
 class SecondDerivativeOperatorTypeII:
+    """
+    Second derivative operator order 3 in the internal domain,
+    Implement type II boundary condition after https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
+    For a regular grid only
+    x is the grid at which the function will be defined (nodes)
+    xi are the points where the function will be interpolated
+
+    :param nx: number of nodes
+    :param dx: sampling interval between nodes
+    :param format: format of the sparse operator
+    """
+
     def __init__(self, nx: int, dx: float, format: str ="csc"):
-        """
-        Second derivative operator order 3 in the internal domain,
-        Implement type II boundary condition after https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
-        For a regular grid only
-        x is the grid at which the function will be defined (nodes)
-        xi are the points where the function will be interpolated
-        :param nx: number of nodes
-        :param dx: sampling interval between nodes
-        :param format: format of the sparse operator
-        """
 
         idx2 = dx ** -2.
         self.operator = sp.diags([1, -2, 1], [-1, 0, 1], shape=(nx, nx), format=format) * idx2
@@ -134,23 +137,23 @@ class SecondDerivativeOperatorTypeII:
 
 
 class CubicInterpolator1d(LinearInterpolator1d):
+    """
+    Lagrange Cubic interpolation with boundary type II from https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
+    Works only on a regular grid for now
+    x is the grid at which the function will be defined (nodes)
+    xi are the points where the function will be interpolated
+    :param x0: x of first sample
+    :param nx: number of samples
+    :param dx: sampling interval
+    :param xi: array of points where to interpolate the function
+    :param format: format of the sparse operator
+    """
 
     def __init__(
             self,
             x0: float, nx: int, dx: float,
             xi: np.ndarray,
             format: str ="csc"):
-        """
-        Lagrange Cubic interpolation with boundary type II from https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
-        Works only on a regular grid for now
-        x is the grid at which the function will be defined (nodes)
-        xi are the points where the function will be interpolated
-        :param x0: x of first sample
-        :param nx: number of samples
-        :param dx: sampling interval
-        :param xi: array of points where to interpolate the function
-        :param format: format of the sparse operator
-        """
 
         LinearInterpolator1d.__init__(self, x0=x0, nx=nx, dx=dx, xi=xi, format=format)
         _sp_matrix = SPMATRIXFORMAT[format]
@@ -212,6 +215,16 @@ class CubicInterpolator1d(LinearInterpolator1d):
 
 
 class RFFTInterpolator1d:
+    """
+    Fourier Interpolator based on rfft
+
+    :param x0: x of first sample
+    :param nx: number of samples
+    :param dx: sampling interval
+    :param xi: array of points where to interpolate the function
+    :param format: format of the sparse operator
+
+    """
     def __init__(
             self, 
             x0: float, nx: int, dx: float,

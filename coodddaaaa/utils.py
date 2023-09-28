@@ -8,7 +8,10 @@ import numpy as np
 
 
 class Timer:
-    """Counts the execution time under the "with" statement"""
+    """Counts the execution time under the "with" statement
+
+    :param message:
+    """
 
     def __init__(self, message: str):
         self.message = message
@@ -23,11 +26,13 @@ class Timer:
 
 
 def polyspace(xmin: float, xmax: float, nx: int, pwr: float):
-    """a power low to refine resolution near zero
+    """A power-law to refine resolution of a stretching grid search near zero
+
     :param xmin: min value
     :param xmax: max value
     :param nx: number of points
-    :param pwr: power coefficient, the higher the finer the resolution near 0
+    :param pwr: power coefficient, increase pwr to refine the resolution near 0
+
     """
     assert pwr > 0, ValueError(pwr)
 
@@ -40,10 +45,11 @@ def polyspace(xmin: float, xmax: float, nx: int, pwr: float):
 class TukeyWindow:
     """
     A parameterizable 4 points Tukey function
+    :param t0 ... t3: times of the corners of the Tukey window
     """
     def __init__(self, t0:float, t1:float, t2:float, t3:float):
         """
-        :param t0 ... t3: times of the corners of the Tukey window
+
         """
         assert t0 <= t1 <= t2 <= t3
         self.t0 = t0
@@ -59,7 +65,8 @@ class TukeyWindow:
 
     def __call__(self, t: np.ndarray):
         """
-        evaluate the taper function at t
+        Evaluate the taper function at t
+
         :param t: does not need to be sorted or regularly spaced
         """
         i = np.argsort(t)

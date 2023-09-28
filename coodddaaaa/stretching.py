@@ -26,6 +26,14 @@ class Stretcher:
     The user can pre-compute and store the stretched basis of the reference signal.
     This basis can then be provided for stretching correlation with a new signal.
     This object can also compute the stretching between all pairs of signals in a b-scan.
+
+    :param t0: time of first sample
+    :param dt: sampling interval
+    :param nt: number of samples
+    :param eps: epsilon array
+    :param norm: use it to compute normalized correlation.
+                 warning : for stretching only, use norm = False
+    :param interp_kind: which interpolator to use for stretching, among 'linear', "cubic", 'fourier'
     """
     def __init__(self,
                  t0: float, dt: float, nt: int,
@@ -33,13 +41,8 @@ class Stretcher:
                  norm: bool = False,
                  interp_kind: Literal['linear', "cubic", 'fourier'] = "cubic"):
         """
-        :param t0: time of first sample
-        :param dt: sampling interval
-        :param nt: number of samples
-        :param eps: epsilon array
-        :param norm: use it to compute normalized correlation.
-                     warning : for stretching only, use norm = False
-        :param interp_kind: which interpolator to use for stretching
+        Initiate the stretcher and the interpolator on a fixed interpolation grid.
+
         """
         assert interp_kind in ['linear', 'cubic', 'fourier']
 
@@ -89,7 +92,8 @@ class Stretcher:
 
     def stretch(self, x: np.ndarray) -> np.ndarray:
         """
-        compute the stretched basis functions from a signal x
+        Compute the stretched basis functions from a signal x
+
         :param x: the input signal (reference), np.ndarray, 1d, shape (nt, )
         :return x_stretched: the stretched version of x for all values in self.eps, np.ndarray 2d, shape (neps, nt)
         """
@@ -117,6 +121,7 @@ class Stretcher:
     def corr(self, x: np.ndarray, x_stretched: np.ndarray) -> np.ndarray:
         """
         Stretching correlation of x with a basis of stretched versions of the reference signal
+
         :param x: signal(s) to be correlated to the reference, np.ndarray,
             either one single signal, 1d, shape (nt, )
             or a bscan, 2d, shape (ntraces, nt)
@@ -152,7 +157,8 @@ class Stretcher:
 
     def corrmax(self, c: np.ndarray) -> (Union[float, np.ndarray], Union[float, np.ndarray]):
         """
-        find the maximum of the correlation function with subsample precision
+        Find the maximum of the correlation function with subsample precision
+
         :param c: correlation function(s) from self.corr
             1d for a single signal, shape (neps, )
             2d for a bscan, shape (neps, ntraces)
@@ -191,7 +197,8 @@ class Stretcher:
 
     def corr_all_with_all(self, data: np.ndarray) -> (np.ndarray, np.ndarray):
         """
-        correlate all possible pairs of signals in a bscan
+        Correlate all possible pairs of signals in a bscan
+
         :param data: the bscan, one trace per row, same sampling (=self.t), 2d, shape (ntraces, nt)
         :return c_triu: the max correlation coefficients for all pairs (upper triangle only)
         :return e_triu: the best stretching coefficients for all pairs (upper triangle only)
@@ -225,7 +232,8 @@ class Stretcher:
     @staticmethod
     def triu2dense(x_triu: np.ndarray, symetric: bool, diag: float) -> np.ndarray:
         """
-        convert upper triangle matrix to square matrix
+        Convert upper triangle matrix to square matrix
+
         :param x_triu: a flat upper triangle without diagonal, 1d, np.ndarray, shape (ntraces * (ntraces - 1) / 2, )
         :param symetric: to impose symetry (True) or anti-symetry (False)
         :param diag: the value to put on the diagonal
@@ -255,7 +263,8 @@ class Stretcher:
             cmax: Union[float, np.ndarray], fmin: float, fmax: float, tmin: float, tmax: float) \
             -> Union[float, np.ndarray]:
         """
-        stretching uncertainty after Weaver et al 2011
+        Stretching uncertainty after Weaver et al 2011.
+
         :param cmax: max correlation coefficient from self.corrmax, either a float or a np.ndarray
         :param fmin: lower freq Hz, float
         :param fmax: upper freq Hz, float
@@ -276,13 +285,22 @@ class Stretcher:
 class InverseStretcher:
     """
     An object to cancel the effect of the stretching on each trace of a bscan
-    for example
+    This can be used to align the traces with the reference, and then to refine the reference.
+
+    For example:
         you have a bscan of 256 traces with n samples each, bscan is a 2d array shapped (256, n)
         you have an estimate of the stretching history, i.e. 256 epsilon values in an 1D array
-
         this object returns the bscan corrected from the estimated stretching values
             positive epsilon values (i.e. positive dv/v) mean that the trace was compressed relative to its ref, so this operator stretch it
             negative epsilon values will tend to compress the waveform
+
+    :param t0: time of first sample
+    :param nt: number of samples
+    :param dt: sampling interval
+
+    :param eps_history: epsilon array, one item per trace in the bscan
+    :param interp_kind: which interpolator to use for inverse stretching, among 'linear',
+
     """
     def __init__(self, t0: float, nt: int, dt: float, eps_history: np.ndarray, interp_kind: Literal['linear'] = "linear"):
 

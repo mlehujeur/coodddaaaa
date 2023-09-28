@@ -1,7 +1,7 @@
 """
-SOURCE : sigy 1.5.3, M.L. 21/04/2023
+Modified after sigy 1.5.3, M.L. 21/04/2023
 
-time / fourier domain butterworth filter
+Time / Fourier domain butterworth filter
 warning : the fourier domain filter has a slightly different response that the time domain one
           comparing both reveals that the time domain filter may include a water-level that do not 
           not exist with fourier domain, this results in slight differences near the signal edges
@@ -17,6 +17,14 @@ import numpy as np
 
 
 class ButterworthFilter(object):
+    """
+
+    :param freqmin: lower frequency in Hz, or None for highpass filtering
+    :param freqmax: upper frequency in Hz, or None for lowpass filtering
+    :param sampling_rate: in Hz
+    :param order: of the filter
+    """
+
     _sos = None
     _sampling_rate = None
 
@@ -62,9 +70,10 @@ class ButterworthFilter(object):
         return filtered_data
 
     def response(self, npts, zerophase=False, input_domain="fft", qc=False):
-        """ almost equivalent to timecall
-         the response looks better than timecall, no water level applied
-         """
+        """
+        Almost equivalent to timecall
+        the response looks better than timecall, no water level applied
+        """
 
         if input_domain == "fft":
             freqs = fftfreq(npts, 1. / self._sampling_rate)
@@ -126,9 +135,14 @@ class ButterworthFilter(object):
 
     def __call__(self, data, zerophase=False, axis=-1, input_domain="time"):
         """
-        return the filtered data
+        Returns the filtered data
         can be called on time domain (real or complex) data
         fft or rfft transformed data (use input_domain)
+
+        :param data:
+        :param zerophase:
+        :param axis:
+        :param input_domain:
         """
         if input_domain == "time":
             return self.timecall(data=data, zerophase=zerophase, axis=axis)
@@ -176,7 +190,9 @@ class ButterworthFilter(object):
         
 
 class BandpassFilter(ButterworthFilter):
-
+    """
+    Shortcut for ButterworthFilter for band-pass filtering
+    """
     def __init__(self, freqmin, freqmax, sampling_rate, order=4):
         ButterworthFilter.__init__(
             self, freqmin=freqmin, freqmax=freqmax,
@@ -184,6 +200,9 @@ class BandpassFilter(ButterworthFilter):
 
 
 class LowpassFilter(ButterworthFilter):
+    """
+    Shortcut for ButterworthFilter for low-pass filtering
+    """
 
     def __init__(self, freqmax, sampling_rate, order=4):
         ButterworthFilter.__init__(
@@ -192,7 +211,9 @@ class LowpassFilter(ButterworthFilter):
 
 
 class HighpassFilter(ButterworthFilter):
-
+    """
+    Shortcut for ButterworthFilter for high-pass filtering
+    """
     def __init__(self, freqmin, sampling_rate, order=4):
         ButterworthFilter.__init__(
             self, freqmin=freqmin, freqmax=None,
