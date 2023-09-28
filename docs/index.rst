@@ -1,10 +1,10 @@
 .. COoDddAaaa documentation master file, created by
-   sphinx-quickstart on Wed Sep 27 21:08:56 2023.
+   sphinx-quickstart on Thu Sep 28 09:18:27 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to COoDddAaaa's documentation!
-======================================
+COoDddAaaa
+==========
 
 .. toctree::
    :maxdepth: 2
@@ -12,3 +12,5 @@ Welcome to COoDddAaaa's documentation!
 
    readme_link
    modules
+   examples
+

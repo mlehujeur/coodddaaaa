@@ -1,28 +1,23 @@
-# ReadMe
-
 Signal processing tools to perform stretching based correlation in python. 
 
-### Installation instructions
+### Download
 ```bash
 git clone git@gitlab.univ-eiffel.fr:maximilien.lehujeur/coodddaaaa.git
+```
+
+### Install
+```
 cd coodddaaaa
 pip install .
+
 ```
 
-### Examples
-See the jupyter notebooks in `./examples`
-
-### Documentation
-To generate the documentation, run 
+### Build the documentation pages
+To generate the documentation pages `docs/COoDddAaaaDocumentation.html`, run 
 ```bash 
-python setup.py doc
-```
-The documentation pages are now in 
-* ./docs/_build/html/index.html
-* ./examples/_build/html/index.html
-
-```bash 
-xdg-open ./docs/_build/html/index.html & 
-xdg-open ./examples/_build/html/index.html 
+python setup.py doc && xdg-open docs/COoDddAaaaDocumentation.html
 
 ```
+
+### Tutorials 
+See the jupyter notebooks in `examples`

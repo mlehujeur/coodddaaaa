@@ -1,12 +1,3 @@
-
-Module contents
----------------
-
-.. automodule:: coodddaaaa
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 coodddaaaa.stretching
 ----------------------------
 

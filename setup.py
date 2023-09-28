@@ -15,8 +15,8 @@ class MakeTheDoc(setuptools.Command):
     def run(self):
         subprocess.run(
             ['cd docs && '
-             'make html && '
-             'cd ../examples && '
+             'ln -s ../examples/*.ipynb . &&'
+             'make clean && '
              'make html '
              ''], shell=True)
         
