@@ -10,12 +10,22 @@ from scipy.sparse import block_diag
 
 
 class Stretcher:
-    """
-    An object to compute stretched signals and stretching correlation as defined in Weaver et al., 2011
-    The object pre-computes the interpolation operator
-    The user can pre-compute and store the stretched basis of the reference signal
-    This basis can then be provided for stretching correlation with a new signal
-    This object can also compute the stretching between all pairs of signals in a b-scan
+    r"""
+    An object to compute stretched signals and to perform stretching correlation as defined in Weaver et al., 2011.
+
+    .. math:: X(\varepsilon) =
+        \frac
+            {\int{y^{ref}(t \times (1 + \varepsilon)) \cdot y(t) dt}}
+            {\sqrt{
+                \int{y^{ref}(t) dt}
+                \int{y(t) dt}
+                }}
+
+
+    The object pre-computes the interpolation operator.
+    The user can pre-compute and store the stretched basis of the reference signal.
+    This basis can then be provided for stretching correlation with a new signal.
+    This object can also compute the stretching between all pairs of signals in a b-scan.
     """
     def __init__(self,
                  t0: float, dt: float, nt: int,

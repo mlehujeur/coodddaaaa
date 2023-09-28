@@ -17,9 +17,10 @@ release = '1.3'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", 
-               "myst_parser", 
-               'nbsphinx', 'sphinx.ext.mathjax',]
+extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc",
+              'sphinx.ext.mathjax', 'sphinx.ext.ifconfig',
+              "myst_parser",
+              'nbsphinx']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
