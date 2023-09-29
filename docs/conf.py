@@ -8,11 +8,14 @@
 
 import sys, os
 sys.path.insert(0, os.path.abspath('..'))
+from coodddaaaa import __version__
 
 project = 'COoDddAaaa'
 copyright = '2023, M. Lehujeur, P. Mora'
 author = 'M. Lehujeur, P. Mora'
-release = '1.3'
+release = __version__
+
+rst_epilog = '.. |__version__| replace:: %s' % __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
