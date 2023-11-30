@@ -17,8 +17,8 @@ class Stretcher:
         \frac
             {\int{y^{ref}(t \times (1 + \varepsilon)) \cdot y(t) dt}}
             {\sqrt{
-                \int{y^{ref}(t) dt}
-                \int{y(t) dt}
+                \int{y^{ref}(t \times (1 + \varepsilon))^2 dt}
+                \int{y(t)^2 dt}
                 }}
 
 
