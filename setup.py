@@ -30,8 +30,9 @@ class MakeTheDoc(setuptools.Command):
 
     def run(self):
         subprocess.run(
-            ['sphinx-build docs/ docs/_build'], shell=True)
-        
+            ['sphinx-build docsrc docs'], shell=True)
+
+
 __version__ = load_version_number()        
 setuptools.setup(
     name="coodddaaaa",
