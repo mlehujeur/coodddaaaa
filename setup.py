@@ -56,5 +56,6 @@ setuptools.setup(
         'numpy', 'scipy', 'matplotlib', 
         'jupyter', 'notebook',
         'sphinx', 'sphinx-rtd-theme', 'myst-parser',  # to generate the sphinx doc
+        'nbsphinx',
         ],
     scripts=[])
