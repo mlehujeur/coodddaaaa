@@ -45,7 +45,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Operating System :: Linux",
+        "Operating System :: POSIX :: Linux",
         "Operating System :: Microsoft :: Windows",
         ],
     cmdclass={
