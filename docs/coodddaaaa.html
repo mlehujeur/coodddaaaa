@@ -1,0 +1,622 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coodddaaaa.stretching &mdash; COoDddAaaa 1.4.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=02f2166e"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Sources" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            COoDddAaaa
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme_link.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Sources</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">coodddaaaa.stretching</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.stretching.Stretcher"><code class="docutils literal notranslate"><span class="pre">Stretcher</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#coodddaaaa.stretching.Stretcher.stretch"><code class="docutils literal notranslate"><span class="pre">Stretcher.stretch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coodddaaaa.stretching.Stretcher.corr"><code class="docutils literal notranslate"><span class="pre">Stretcher.corr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coodddaaaa.stretching.Stretcher.corrmax"><code class="docutils literal notranslate"><span class="pre">Stretcher.corrmax()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coodddaaaa.stretching.Stretcher.corr_all_with_all"><code class="docutils literal notranslate"><span class="pre">Stretcher.corr_all_with_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coodddaaaa.stretching.Stretcher.triu2dense"><code class="docutils literal notranslate"><span class="pre">Stretcher.triu2dense()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coodddaaaa.stretching.Stretcher.stretching_uncertainty"><code class="docutils literal notranslate"><span class="pre">Stretcher.stretching_uncertainty()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.stretching.InverseStretcher"><code class="docutils literal notranslate"><span class="pre">InverseStretcher</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-coodddaaaa.interp1d">coodddaaaa.interp1d</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.interp1d.LinearInterpolator1d"><code class="docutils literal notranslate"><span class="pre">LinearInterpolator1d</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#coodddaaaa.interp1d.LinearInterpolator1d.find_interp_points_in_grid"><code class="docutils literal notranslate"><span class="pre">LinearInterpolator1d.find_interp_points_in_grid()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.interp1d.SecondDerivativeOperatorTypeII"><code class="docutils literal notranslate"><span class="pre">SecondDerivativeOperatorTypeII</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.interp1d.CubicInterpolator1d"><code class="docutils literal notranslate"><span class="pre">CubicInterpolator1d</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.interp1d.RFFTInterpolator1d"><code class="docutils literal notranslate"><span class="pre">RFFTInterpolator1d</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-coodddaaaa.utils">coodddaaaa.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.utils.Timer"><code class="docutils literal notranslate"><span class="pre">Timer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.utils.polyspace"><code class="docutils literal notranslate"><span class="pre">polyspace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.utils.TukeyWindow"><code class="docutils literal notranslate"><span class="pre">TukeyWindow</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-coodddaaaa.butter">coodddaaaa.butter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.butter.ButterworthFilter"><code class="docutils literal notranslate"><span class="pre">ButterworthFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#coodddaaaa.butter.ButterworthFilter.timecall"><code class="docutils literal notranslate"><span class="pre">ButterworthFilter.timecall()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coodddaaaa.butter.ButterworthFilter.response"><code class="docutils literal notranslate"><span class="pre">ButterworthFilter.response()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coodddaaaa.butter.ButterworthFilter.show"><code class="docutils literal notranslate"><span class="pre">ButterworthFilter.show()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.butter.BandpassFilter"><code class="docutils literal notranslate"><span class="pre">BandpassFilter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.butter.LowpassFilter"><code class="docutils literal notranslate"><span class="pre">LowpassFilter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.butter.HighpassFilter"><code class="docutils literal notranslate"><span class="pre">HighpassFilter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-coodddaaaa.fftoversamp">coodddaaaa.fftoversamp</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.fftoversamp.oversamp"><code class="docutils literal notranslate"><span class="pre">oversamp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.fftoversamp.fft_oversamp"><code class="docutils literal notranslate"><span class="pre">fft_oversamp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-coodddaaaa.hypermax">coodddaaaa.hypermax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coodddaaaa.hypermax.hypermax"><code class="docutils literal notranslate"><span class="pre">hypermax()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">COoDddAaaa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Sources</a></li>
+      <li class="breadcrumb-item active">coodddaaaa.stretching</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/coodddaaaa.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-coodddaaaa.stretching">
+<span id="coodddaaaa-stretching"></span><h1>coodddaaaa.stretching<a class="headerlink" href="#module-coodddaaaa.stretching" title="Link to this heading"></a></h1>
+<p>Copyright (c) 2023 maximilien.lehujeur</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.stretching.Stretcher">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.stretching.</span></span><span class="sig-name descname"><span class="pre">Stretcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'linear'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'cubic'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fourier'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cubic'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/stretching.html#Stretcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.stretching.Stretcher" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An object to compute stretched signals and to perform stretching correlation as defined in Weaver et al., 2011.</p>
+<div class="math notranslate nohighlight">
+\[X(\varepsilon) =
+\frac
+    {\int{y^{ref}(t \times (1 + \varepsilon)) \cdot y(t) dt}}
+    {\sqrt{
+        \int{y^{ref}(t \times (1 + \varepsilon))^2 dt}
+        \int{y(t)^2 dt}
+        }}\]</div>
+<p>The object pre-computes the interpolation operator.
+The user can pre-compute and store the stretched basis of the reference signal.
+This basis can then be provided for stretching correlation with a new signal.
+This object can also compute the stretching between all pairs of signals in a b-scan.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t0</strong> – time of first sample</p></li>
+<li><p><strong>dt</strong> – sampling interval</p></li>
+<li><p><strong>nt</strong> – number of samples</p></li>
+<li><p><strong>eps</strong> – epsilon array</p></li>
+<li><p><strong>norm</strong> – use it to compute normalized correlation.
+warning : for stretching only, use norm = False</p></li>
+<li><p><strong>interp_kind</strong> – which interpolator to use for stretching, among ‘linear’, “cubic”, ‘fourier’</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="coodddaaaa.stretching.Stretcher.stretch">
+<span class="sig-name descname"><span class="pre">stretch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/coodddaaaa/stretching.html#Stretcher.stretch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.stretching.Stretcher.stretch" title="Link to this definition"></a></dt>
+<dd><p>Compute the stretched basis functions from a signal x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> – the input signal (reference), np.ndarray, 1d, shape (nt, )</p>
+</dd>
+<dt class="field-even">Return x_stretched<span class="colon">:</span></dt>
+<dd class="field-even"><p>the stretched version of x for all values in self.eps, np.ndarray 2d, shape (neps, nt)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coodddaaaa.stretching.Stretcher.corr">
+<span class="sig-name descname"><span class="pre">corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_stretched</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/coodddaaaa/stretching.html#Stretcher.corr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.stretching.Stretcher.corr" title="Link to this definition"></a></dt>
+<dd><p>Stretching correlation of x with a basis of stretched versions of the reference signal</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – signal(s) to be correlated to the reference, np.ndarray,
+either one single signal, 1d, shape (nt, )
+or a bscan, 2d, shape (ntraces, nt)</p></li>
+<li><p><strong>x_stretched</strong> – stretched reference from self.stretch, np.ndarray, 2d, shape (neps, nt, )</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return c<span class="colon">:</span></dt>
+<dd class="field-even"><p>correlation function np.ndarray,
+either 1d, shape (neps, ) if x is 1d
+or 2d, shape (neps, ntraces) if x is 2d</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coodddaaaa.stretching.Stretcher.corrmax">
+<span class="sig-name descname"><span class="pre">corrmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/stretching.html#Stretcher.corrmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.stretching.Stretcher.corrmax" title="Link to this definition"></a></dt>
+<dd><p>Find the maximum of the correlation function with subsample precision</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>c</strong> – correlation function(s) from self.corr
+1d for a single signal, shape (neps, )
+2d for a bscan, shape (neps, ntraces)</p>
+</dd>
+<dt class="field-even">Return emax<span class="colon">:</span></dt>
+<dd class="field-even"><p>best epsilon value, dimensionless, it corresponds to dt/t
+float if c is 1d
+1d array, shape (ntraces, ) if c is 2d</p>
+</dd>
+<dt class="field-odd">Return cmax<span class="colon">:</span></dt>
+<dd class="field-odd"><p>max correlation, dimensionless, normalized if norm was True in __init__
+float if c is 1d
+1d array, shape (ntraces, ) if c is 2d</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coodddaaaa.stretching.Stretcher.corr_all_with_all">
+<span class="sig-name descname"><span class="pre">corr_all_with_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data:</span> <span class="pre">~numpy.ndarray)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'numpy.ndarray'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'numpy.ndarray'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/stretching.html#Stretcher.corr_all_with_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.stretching.Stretcher.corr_all_with_all" title="Link to this definition"></a></dt>
+<dd><p>Correlate all possible pairs of signals in a bscan</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> – the bscan, one trace per row, same sampling (=self.t), 2d, shape (ntraces, nt)</p>
+</dd>
+<dt class="field-even">Return c_triu<span class="colon">:</span></dt>
+<dd class="field-even"><p>the max correlation coefficients for all pairs (upper triangle only)</p>
+</dd>
+<dt class="field-odd">Return e_triu<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the best stretching coefficients for all pairs (upper triangle only)</p>
+</dd>
+</dl>
+<p>use self.triu2dence to get the full matrices</p>
+<p>c = Stretcher.triu2dense(c_triu, symetric=True, diag=1.0)
+e = Stretcher.triu2dense(e_triu, symetric=False, diag=0.0)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coodddaaaa.stretching.Stretcher.triu2dense">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">triu2dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_triu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symetric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/coodddaaaa/stretching.html#Stretcher.triu2dense"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.stretching.Stretcher.triu2dense" title="Link to this definition"></a></dt>
+<dd><p>Convert upper triangle matrix to square matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_triu</strong> – a flat upper triangle without diagonal, 1d, np.ndarray, shape (ntraces * (ntraces - 1) / 2, )</p></li>
+<li><p><strong>symetric</strong> – to impose symetry (True) or anti-symetry (False)</p></li>
+<li><p><strong>diag</strong> – the value to put on the diagonal</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return x<span class="colon">:</span></dt>
+<dd class="field-even"><p>a square matrix with x_triu on its upper triangle, shape (ntraces, ntraces)
+diag on its diagonal
++-x_triu on its lower triangle</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coodddaaaa.stretching.Stretcher.stretching_uncertainty">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stretching_uncertainty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/coodddaaaa/stretching.html#Stretcher.stretching_uncertainty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.stretching.Stretcher.stretching_uncertainty" title="Link to this definition"></a></dt>
+<dd><p>Stretching uncertainty after Weaver et al 2011.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmax</strong> – max correlation coefficient from self.corrmax, either a float or a np.ndarray</p></li>
+<li><p><strong>fmin</strong> – lower freq Hz, float</p></li>
+<li><p><strong>fmax</strong> – upper freq Hz, float</p></li>
+<li><p><strong>tmin</strong> – start coda time in s, float</p></li>
+<li><p><strong>tmax</strong> – end coda time in s, float</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return rmse<span class="colon">:</span></dt>
+<dd class="field-even"><p>uncertainty on epsilon, same type as cmax</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.stretching.InverseStretcher">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.stretching.</span></span><span class="sig-name descname"><span class="pre">InverseStretcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'linear'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/stretching.html#InverseStretcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.stretching.InverseStretcher" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An object to cancel the effect of the stretching on each trace of a bscan
+This can be used to align the traces with the reference, and then to refine the reference.</p>
+<dl>
+<dt>For example:</dt><dd><p>you have a bscan of 256 traces with n samples each, bscan is a 2d array shapped (256, n)
+you have an estimate of the stretching history, i.e. 256 epsilon values in an 1D array
+this object returns the bscan corrected from the estimated stretching values</p>
+<blockquote>
+<div><p>positive epsilon values (i.e. positive dv/v) mean that the trace was compressed relative to its ref, so this operator stretch it
+negative epsilon values will tend to compress the waveform</p>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t0</strong> – time of first sample</p></li>
+<li><p><strong>nt</strong> – number of samples</p></li>
+<li><p><strong>dt</strong> – sampling interval</p></li>
+<li><p><strong>eps_history</strong> – epsilon array, one item per trace in the bscan</p></li>
+<li><p><strong>interp_kind</strong> – which interpolator to use for inverse stretching, among ‘linear’,</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-coodddaaaa.interp1d">
+<span id="coodddaaaa-interp1d"></span><h1>coodddaaaa.interp1d<a class="headerlink" href="#module-coodddaaaa.interp1d" title="Link to this heading"></a></h1>
+<p>Copyright (c) 2023 maximilien.lehujeur</p>
+<p>Linear and cubic interpolation in 1d using fixed grids
+and sparse operators for cases where one need 
+to interpolate functions on the same grids many times</p>
+<p>note I do not use the scipy interpolator
+because I need an interpolator that can be created from the grids only
+and called later on with the function to interpolate</p>
+<p>2023.04.07 : P. Mora : Speed up the construction of the sparse matrixes =&gt; x20 to x50</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.interp1d.LinearInterpolator1d">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.interp1d.</span></span><span class="sig-name descname"><span class="pre">LinearInterpolator1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'csc'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/interp1d.html#LinearInterpolator1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.interp1d.LinearInterpolator1d" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Linear interpolation operator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x0</strong> – x coordinate of the first sample</p></li>
+<li><p><strong>nx</strong> – number of samples</p></li>
+<li><p><strong>dx</strong> – sampling interval</p></li>
+<li><p><strong>xi</strong> – the points where we need the interpolated values
+=&gt; f(xi) is computed by self.__call__</p></li>
+<li><p><strong>format</strong> – format to use for the linear operator</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="coodddaaaa.interp1d.LinearInterpolator1d.find_interp_points_in_grid">
+<span class="sig-name descname"><span class="pre">find_interp_points_in_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/interp1d.html#LinearInterpolator1d.find_interp_points_in_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.interp1d.LinearInterpolator1d.find_interp_points_in_grid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.interp1d.SecondDerivativeOperatorTypeII">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.interp1d.</span></span><span class="sig-name descname"><span class="pre">SecondDerivativeOperatorTypeII</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'csc'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/interp1d.html#SecondDerivativeOperatorTypeII"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.interp1d.SecondDerivativeOperatorTypeII" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Second derivative operator order 3 in the internal domain,
+Implement type II boundary condition after <a class="reference external" href="https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation">https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation</a>
+For a regular grid only
+x is the grid at which the function will be defined (nodes)
+xi are the points where the function will be interpolated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nx</strong> – number of nodes</p></li>
+<li><p><strong>dx</strong> – sampling interval between nodes</p></li>
+<li><p><strong>format</strong> – format of the sparse operator</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.interp1d.CubicInterpolator1d">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.interp1d.</span></span><span class="sig-name descname"><span class="pre">CubicInterpolator1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'csc'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/interp1d.html#CubicInterpolator1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.interp1d.CubicInterpolator1d" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coodddaaaa.interp1d.LinearInterpolator1d" title="coodddaaaa.interp1d.LinearInterpolator1d"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearInterpolator1d</span></code></a></p>
+<p>Lagrange Cubic interpolation with boundary type II from <a class="reference external" href="https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation">https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation</a>
+Works only on a regular grid for now
+x is the grid at which the function will be defined (nodes)
+xi are the points where the function will be interpolated
+:param x0: x of first sample
+:param nx: number of samples
+:param dx: sampling interval
+:param xi: array of points where to interpolate the function
+:param format: format of the sparse operator</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.interp1d.RFFTInterpolator1d">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.interp1d.</span></span><span class="sig-name descname"><span class="pre">RFFTInterpolator1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/interp1d.html#RFFTInterpolator1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.interp1d.RFFTInterpolator1d" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Fourier Interpolator based on rfft</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x0</strong> – x of first sample</p></li>
+<li><p><strong>nx</strong> – number of samples</p></li>
+<li><p><strong>dx</strong> – sampling interval</p></li>
+<li><p><strong>xi</strong> – array of points where to interpolate the function</p></li>
+<li><p><strong>format</strong> – format of the sparse operator</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-coodddaaaa.utils">
+<span id="coodddaaaa-utils"></span><h1>coodddaaaa.utils<a class="headerlink" href="#module-coodddaaaa.utils" title="Link to this heading"></a></h1>
+<p>Copyright (c) 2023 maximilien.lehujeur</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.utils.Timer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.utils.</span></span><span class="sig-name descname"><span class="pre">Timer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/utils.html#Timer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.utils.Timer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Counts the execution time under the “with” statement</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coodddaaaa.utils.polyspace">
+<span class="sig-prename descclassname"><span class="pre">coodddaaaa.utils.</span></span><span class="sig-name descname"><span class="pre">polyspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pwr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/utils.html#polyspace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.utils.polyspace" title="Link to this definition"></a></dt>
+<dd><p>A power-law to refine resolution of a stretching grid search near zero</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xmin</strong> – min value</p></li>
+<li><p><strong>xmax</strong> – max value</p></li>
+<li><p><strong>nx</strong> – number of points</p></li>
+<li><p><strong>pwr</strong> – power coefficient, increase pwr to refine the resolution near 0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.utils.TukeyWindow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.utils.</span></span><span class="sig-name descname"><span class="pre">TukeyWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t3</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/utils.html#TukeyWindow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.utils.TukeyWindow" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A parameterizable 4 points Tukey function
+:param t0 … t3: times of the corners of the Tukey window</p>
+</dd></dl>
+
+</section>
+<section id="module-coodddaaaa.butter">
+<span id="coodddaaaa-butter"></span><h1>coodddaaaa.butter<a class="headerlink" href="#module-coodddaaaa.butter" title="Link to this heading"></a></h1>
+<p>Modified after sigy 1.5.3, M.L. 21/04/2023</p>
+<p>Time / Fourier domain butterworth filter
+warning : the fourier domain filter has a slightly different response that the time domain one</p>
+<blockquote>
+<div><p>comparing both reveals that the time domain filter may include a water-level that do not 
+not exist with fourier domain, this results in slight differences near the signal edges
+taper the waveform properly fixes the difference</p>
+</div></blockquote>
+<p>TODO : use ba_analog ?
+TODO : use scipy.fft =&gt; parallel</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.butter.ButterworthFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.butter.</span></span><span class="sig-name descname"><span class="pre">ButterworthFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/butter.html#ButterworthFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.butter.ButterworthFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freqmin</strong> – lower frequency in Hz, or None for highpass filtering</p></li>
+<li><p><strong>freqmax</strong> – upper frequency in Hz, or None for lowpass filtering</p></li>
+<li><p><strong>sampling_rate</strong> – in Hz</p></li>
+<li><p><strong>order</strong> – of the filter</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="coodddaaaa.butter.ButterworthFilter.timecall">
+<span class="sig-name descname"><span class="pre">timecall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/butter.html#ButterworthFilter.timecall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.butter.ButterworthFilter.timecall" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coodddaaaa.butter.ButterworthFilter.response">
+<span class="sig-name descname"><span class="pre">response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">npts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fft'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/butter.html#ButterworthFilter.response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.butter.ButterworthFilter.response" title="Link to this definition"></a></dt>
+<dd><p>Almost equivalent to timecall
+the response looks better than timecall, no water level applied</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coodddaaaa.butter.ButterworthFilter.show">
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerophase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/butter.html#ButterworthFilter.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.butter.ButterworthFilter.show" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.butter.BandpassFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.butter.</span></span><span class="sig-name descname"><span class="pre">BandpassFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/butter.html#BandpassFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.butter.BandpassFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coodddaaaa.butter.ButterworthFilter" title="coodddaaaa.butter.ButterworthFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ButterworthFilter</span></code></a></p>
+<p>Shortcut for ButterworthFilter for band-pass filtering</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.butter.LowpassFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.butter.</span></span><span class="sig-name descname"><span class="pre">LowpassFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/butter.html#LowpassFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.butter.LowpassFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coodddaaaa.butter.ButterworthFilter" title="coodddaaaa.butter.ButterworthFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ButterworthFilter</span></code></a></p>
+<p>Shortcut for ButterworthFilter for low-pass filtering</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="coodddaaaa.butter.HighpassFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coodddaaaa.butter.</span></span><span class="sig-name descname"><span class="pre">HighpassFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/butter.html#HighpassFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.butter.HighpassFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coodddaaaa.butter.ButterworthFilter" title="coodddaaaa.butter.ButterworthFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ButterworthFilter</span></code></a></p>
+<p>Shortcut for ButterworthFilter for high-pass filtering</p>
+</dd></dl>
+
+</section>
+<section id="module-coodddaaaa.fftoversamp">
+<span id="coodddaaaa-fftoversamp"></span><h1>coodddaaaa.fftoversamp<a class="headerlink" href="#module-coodddaaaa.fftoversamp" title="Link to this heading"></a></h1>
+<p>Modified after sigy 1.5.3, M.L. 20/08/2023</p>
+<p>Fourier domain oversampling, for the sake of simplicity, 
+this program can increase the number of samples only by 2**n, where n is an integer.</p>
+<p>The oversampling is performed in the Fourier domain, 
+- for optimal use, it is preferred to use the fft_oversamp</p>
+<blockquote>
+<div><p>if the signal is already in Fourier domain</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>make sure the signal is properly detrended and tapered at its edges prior to FFT
+otherwise, you might observe wiggles at the edges of the signal after oversampling.
+(remember that fft assume a periodization of the signal in time)</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="coodddaaaa.fftoversamp.oversamp">
+<span class="sig-prename descclassname"><span class="pre">coodddaaaa.fftoversamp.</span></span><span class="sig-name descname"><span class="pre">oversamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0:</span> <span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt:</span> <span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npow2:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demean:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'numpy.ndarray'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'numpy.ndarray'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/fftoversamp.html#oversamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.fftoversamp.oversamp" title="Link to this definition"></a></dt>
+<dd><p>Time domain version of fft_oversamp</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t0</strong> – start time, sec</p></li>
+<li><p><strong>dt</strong> – sampling interval, sec</p></li>
+<li><p><strong>data</strong> – time domain data array (1d or more)</p></li>
+<li><p><strong>npow2</strong> – oversamp by 2 ** npow2</p></li>
+<li><p><strong>axis</strong> – axis along which to oversample the signal</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return to<span class="colon">:</span></dt>
+<dd class="field-even"><p>the new time vector</p>
+</dd>
+<dt class="field-odd">Return datao<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the oversample data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="coodddaaaa.fftoversamp.fft_oversamp">
+<span class="sig-prename descclassname"><span class="pre">coodddaaaa.fftoversamp.</span></span><span class="sig-name descname"><span class="pre">fft_oversamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fft_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npow2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/coodddaaaa/fftoversamp.html#fft_oversamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.fftoversamp.fft_oversamp" title="Link to this definition"></a></dt>
+<dd><p>Oversamp a signal by padding it with zeros in the FFT domain
+the number of sample is multiplied by 2 ** npow2 (default 2**1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fft_data</strong> – output of fft</p></li>
+<li><p><strong>npow2</strong> – oversampling rate expressed as a power of 2</p></li>
+<li><p><strong>axis</strong> – the axis along which to perform oversampling</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>oversample data in fft domain</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-coodddaaaa.hypermax">
+<span id="coodddaaaa-hypermax"></span><h1>coodddaaaa.hypermax<a class="headerlink" href="#module-coodddaaaa.hypermax" title="Link to this heading"></a></h1>
+<p>Copyright (c) 2023 maximilien.lehujeur</p>
+<p>Finds the maximum of a random array with subsample precision
+by looking for the zero crossing of the
+first order finite difference derivative</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="coodddaaaa.hypermax.hypermax">
+<span class="sig-prename descclassname"><span class="pre">coodddaaaa.hypermax.</span></span><span class="sig-name descname"><span class="pre">hypermax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axqc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Axes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_t_growing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/coodddaaaa/hypermax.html#hypermax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#coodddaaaa.hypermax.hypermax" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_array</strong> – time array</p></li>
+<li><p><strong>function_array</strong> – function array</p></li>
+<li><p><strong>axqc</strong> – matplotlib ax or None for visual qc</p></li>
+<li><p><strong>assume_t_growing</strong></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="Sources" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, M. Lehujeur, P. Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

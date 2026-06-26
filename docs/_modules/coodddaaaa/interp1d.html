@@ -1,0 +1,465 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coodddaaaa.interp1d &mdash; COoDddAaaa 1.4.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=02f2166e"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            COoDddAaaa
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme_link.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">COoDddAaaa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coodddaaaa.interp1d</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coodddaaaa.interp1d</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright (c) 2023 maximilien.lehujeur</span>
+
+<span class="sd">Linear and cubic interpolation in 1d using fixed grids</span>
+<span class="sd">and sparse operators for cases where one need </span>
+<span class="sd">to interpolate functions on the same grids many times</span>
+
+<span class="sd">note I do not use the scipy interpolator</span>
+<span class="sd">because I need an interpolator that can be created from the grids only</span>
+<span class="sd">and called later on with the function to interpolate</span>
+
+<span class="sd">2023.04.07 : P. Mora : Speed up the construction of the sparse matrixes =&gt; x20 to x50</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sparse</span> <span class="k">as</span> <span class="n">sp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">linalg</span> <span class="k">as</span> <span class="n">splinalg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.fftpack</span><span class="w"> </span><span class="kn">import</span> <span class="n">rfft</span>  <span class="c1"># NOT scipy.fft.rfft !!!</span>
+
+<span class="n">SPMATRIXFORMAT</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;csc&quot;</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">,</span> <span class="s2">&quot;csr&quot;</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="LinearInterpolator1d">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.interp1d.LinearInterpolator1d">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinearInterpolator1d</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Linear interpolation operator</span>
+
+<span class="sd">    :param x0: x coordinate of the first sample</span>
+<span class="sd">    :param nx: number of samples</span>
+<span class="sd">    :param dx: sampling interval</span>
+<span class="sd">    :param xi: the points where we need the interpolated values</span>
+<span class="sd">        =&gt; f(xi) is computed by self.__call__</span>
+<span class="sd">    :param format: format to use for the linear operator</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">xi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="s2">&quot;csc&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        x is the grid at which the function will be defined (nodes)</span>
+<span class="sd">        xi are the points where the function will be interpolated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nx</span> <span class="o">=</span> <span class="n">nx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">=</span> <span class="n">xi</span>
+
+        <span class="c1"># nodes</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nx</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">x0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_idx_xi_to_interp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_x_after_interp_points</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">find_interp_points_in_grid</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">xi</span><span class="p">)</span>
+
+        <span class="c1"># nodes before the interpolation points</span>
+        <span class="n">rows1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_xi_to_interp</span>
+        <span class="n">cols1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_x_after_interp_points</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">dxafter</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx_x_after_interp_points</span><span class="p">]</span> <span class="o">-</span> <span class="n">xi</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx_xi_to_interp</span><span class="p">])</span>
+        <span class="n">vals1</span> <span class="o">=</span> <span class="n">dxafter</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
+
+        <span class="c1"># nodes after the interpolation points</span>
+        <span class="n">rows2</span> <span class="o">=</span> <span class="n">rows1</span>  <span class="c1"># self._idx_xi_to_interp</span>
+        <span class="n">cols2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_x_after_interp_points</span>
+        <span class="n">vals2</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">vals1</span>  <span class="c1"># dxbefore / self.dx</span>
+
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">rows1</span><span class="p">,</span> <span class="n">rows2</span><span class="p">))</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">cols1</span><span class="p">,</span> <span class="n">cols2</span><span class="p">))</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">vals1</span><span class="p">,</span> <span class="n">vals2</span><span class="p">))</span>
+
+        <span class="c1"># assemble</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lininterp_operator</span> <span class="o">=</span> \
+            <span class="n">SPMATRIXFORMAT</span><span class="p">[</span><span class="nb">format</span><span class="p">](</span>
+                <span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">)),</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="p">))</span>
+   
+<div class="viewcode-block" id="LinearInterpolator1d.find_interp_points_in_grid">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.interp1d.LinearInterpolator1d.find_interp_points_in_grid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_interp_points_in_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+
+        <span class="c1"># find indexs of x of nodes located after the interp points xi</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">xi</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># find the interp points that occur within the interp bounds</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">k</span> <span class="o">&lt;</span> <span class="n">nx</span><span class="p">)</span>  <span class="c1"># mask</span>
+        <span class="n">idx_xi_to_interp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xi</span><span class="p">))[</span><span class="n">m</span><span class="p">]</span>  <span class="c1"># to indexs</span>
+
+        <span class="c1"># eliminate the interp points out of bounds</span>
+        <span class="c1"># =&gt; interp will return 0 for these points</span>
+        <span class="n">idx_x_after_interp_points</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="n">idx_xi_to_interp</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">idx_xi_to_interp</span><span class="p">,</span> <span class="n">idx_x_after_interp_points</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        affect function values at x and return the interpolated values at xi</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># assert isinstance(f, np.ndarray)</span>
+        <span class="c1"># assert f.ndim == 1</span>
+        <span class="c1"># assert len(f) == len(self.x)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lininterp_operator</span> <span class="o">*</span> <span class="n">f</span></div>
+
+
+
+<div class="viewcode-block" id="SecondDerivativeOperatorTypeII">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.interp1d.SecondDerivativeOperatorTypeII">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SecondDerivativeOperatorTypeII</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Second derivative operator order 3 in the internal domain,</span>
+<span class="sd">    Implement type II boundary condition after https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation</span>
+<span class="sd">    For a regular grid only</span>
+<span class="sd">    x is the grid at which the function will be defined (nodes)</span>
+<span class="sd">    xi are the points where the function will be interpolated</span>
+
+<span class="sd">    :param nx: number of nodes</span>
+<span class="sd">    :param dx: sampling interval between nodes</span>
+<span class="sd">    :param format: format of the sparse operator</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="s2">&quot;csc&quot;</span><span class="p">):</span>
+
+        <span class="n">idx2</span> <span class="o">=</span> <span class="n">dx</span> <span class="o">**</span> <span class="o">-</span><span class="mf">2.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">nx</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span> <span class="o">*</span> <span class="n">idx2</span>
+        <span class="c1"># for type II boundary condition =&gt; d[0] = 2 * f&#39;&#39;0 = 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># for type II boundary condition =&gt; d[-1] = 2 * f&#39;&#39;[-1] = 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        compute the derivative of f on x</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># assert isinstance(f, np.ndarray)</span>
+        <span class="c1"># assert f.ndim == 1</span>
+        <span class="c1"># assert len(f) == len(self.x)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">*</span> <span class="n">f</span></div>
+
+
+
+<div class="viewcode-block" id="CubicInterpolator1d">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.interp1d.CubicInterpolator1d">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CubicInterpolator1d</span><span class="p">(</span><span class="n">LinearInterpolator1d</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lagrange Cubic interpolation with boundary type II from https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation</span>
+<span class="sd">    Works only on a regular grid for now</span>
+<span class="sd">    x is the grid at which the function will be defined (nodes)</span>
+<span class="sd">    xi are the points where the function will be interpolated</span>
+<span class="sd">    :param x0: x of first sample</span>
+<span class="sd">    :param nx: number of samples</span>
+<span class="sd">    :param dx: sampling interval</span>
+<span class="sd">    :param xi: array of points where to interpolate the function</span>
+<span class="sd">    :param format: format of the sparse operator</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">xi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="s2">&quot;csc&quot;</span><span class="p">):</span>
+
+        <span class="n">LinearInterpolator1d</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span> <span class="n">xi</span><span class="o">=</span><span class="n">xi</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span>
+        <span class="n">_sp_matrix</span> <span class="o">=</span> <span class="n">SPMATRIXFORMAT</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span>
+
+        <span class="c1"># ==== add more internal operators to move to cubic interpolation</span>
+        <span class="c1"># multiply by 3 because 6*f[xi-1,xi,xi+1] means 3 * [f(xi+1) - 2 * f(xi) + f(xi-1)] / (hi**2)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">derivator</span> <span class="o">=</span> <span class="mf">3.</span> <span class="o">*</span> <span class="n">SecondDerivativeOperatorTypeII</span><span class="p">(</span><span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span><span class="o">.</span><span class="n">operator</span>
+
+        <span class="c1"># left term in eq (6) from https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation</span>
+        <span class="n">upper_diag</span> <span class="o">=</span> <span class="mf">.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nx</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>  <span class="c1"># lambda terms</span>
+        <span class="n">diag</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>   <span class="c1"># diagonal terms</span>
+        <span class="n">lower_diag</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nx</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>  <span class="c1"># mu terms</span>
+        <span class="n">lower_diag</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">upper_diag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># type II boundary condition</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">((</span><span class="n">lower_diag</span><span class="p">,</span> <span class="n">diag</span><span class="p">,</span> <span class="n">upper_diag</span><span class="p">),</span> <span class="n">offsets</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span>
+        <span class="c1"># inverse_of_a = splinalg.inv(a)  #=&gt; dense</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">splinalg</span><span class="o">.</span><span class="n">splu</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>  <span class="c1"># =&gt; time cost is negligible (0.4%)</span>
+
+        <span class="c1"># ==== Implement the operator for equation (1), with respect to Mis coefficients</span>
+        <span class="c1">#      the missing terms for yi and yi+1 are included in the self.lininterp_operator term</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nx</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">x0</span>
+
+        <span class="c1"># nodes before the interpolation points</span>
+        <span class="n">rows1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_xi_to_interp</span>
+        <span class="n">cols1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_x_after_interp_points</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">dxafter</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx_x_after_interp_points</span><span class="p">]</span> <span class="o">-</span> <span class="n">xi</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx_xi_to_interp</span><span class="p">])</span>
+        <span class="n">vals1</span> <span class="o">=</span> <span class="n">dxafter</span> <span class="o">**</span> <span class="mf">3.</span> <span class="o">/</span> <span class="p">(</span><span class="mf">6.</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">*</span> <span class="n">dxafter</span> <span class="o">/</span> <span class="mf">6.</span>
+
+        <span class="c1"># nodes after the interpolation points</span>
+        <span class="n">rows2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_xi_to_interp</span>
+        <span class="n">cols2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_x_after_interp_points</span>
+        <span class="n">dxbefore</span> <span class="o">=</span> <span class="p">(</span><span class="n">xi</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx_xi_to_interp</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_idx_x_after_interp_points</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">vals2</span> <span class="o">=</span> <span class="n">dxbefore</span> <span class="o">**</span> <span class="mf">3.</span> <span class="o">/</span> <span class="p">(</span><span class="mf">6.</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">*</span> <span class="n">dxbefore</span> <span class="o">/</span> <span class="mf">6.</span>
+
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">rows1</span><span class="p">,</span> <span class="n">rows2</span><span class="p">))</span>  <span class="c1"># np.repeat(r_, 2)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">cols1</span><span class="p">,</span> <span class="n">cols2</span><span class="p">))</span>  <span class="c1"># np.array([k_-1, k_]).T.flatten()</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">vals1</span><span class="p">,</span> <span class="n">vals2</span><span class="p">))</span>  <span class="c1"># np.array([v1, 1-v1]).T.flatten()</span>
+
+        <span class="c1"># assemble</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cubinterp_operator</span> <span class="o">=</span> \
+            <span class="n">SPMATRIXFORMAT</span><span class="p">[</span><span class="nb">format</span><span class="p">](</span>
+                <span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">)),</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+
+        <span class="c1"># assert isinstance(f, np.ndarray)</span>
+        <span class="c1"># assert f.ndim == 1</span>
+        <span class="c1"># assert len(f) == self.nx</span>
+
+        <span class="c1"># 3 * f[xi-1, xi, xi+1], d0=d-1=0 for type II boundary condition</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">derivator</span> <span class="o">*</span> <span class="n">f</span>
+
+        <span class="c1"># solve equation (6) for M</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cubinterp_operator</span> <span class="o">*</span> <span class="n">m</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">lininterp_operator</span> <span class="o">*</span> <span class="n">f</span></div>
+
+
+    <span class="c1"># TODO : add method to export/reload from npz file</span>
+
+
+<div class="viewcode-block" id="RFFTInterpolator1d">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.interp1d.RFFTInterpolator1d">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RFFTInterpolator1d</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fourier Interpolator based on rfft</span>
+
+<span class="sd">    :param x0: x of first sample</span>
+<span class="sd">    :param nx: number of samples</span>
+<span class="sd">    :param dx: sampling interval</span>
+<span class="sd">    :param xi: array of points where to interpolate the function</span>
+<span class="sd">    :param format: format of the sparse operator</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">xi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nx</span> <span class="o">=</span> <span class="n">nx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">=</span> <span class="n">xi</span>
+
+        <span class="n">npts</span> <span class="o">=</span> <span class="n">nx</span>
+        <span class="n">fnfft</span> <span class="o">=</span> <span class="n">npts</span>
+        <span class="n">two_pi</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">xi</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">npts</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">npts</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">xi</span><span class="p">)))</span>
+        <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="k">if</span> <span class="n">npts</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">npts</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">+</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">two_pi</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">:(</span><span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="n">fnfft</span><span class="p">)</span>
+            <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="n">npts</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">two_pi</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">:(</span><span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="n">fnfft</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">+</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">two_pi</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">npts</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="n">fnfft</span><span class="p">)</span>
+            <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">two_pi</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">npts</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="n">fnfft</span><span class="p">)</span>
+            <span class="n">b</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">+</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">two_pi</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">npts</span> <span class="o">/</span> <span class="n">fnfft</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
+
+        <span class="n">b</span> <span class="o">*=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">fnfft</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_irfft_basis</span> <span class="o">=</span> <span class="n">b</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        affect function values at x and return the interpolated values at xi</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># assert isinstance(f, np.ndarray)</span>
+        <span class="c1"># assert f.ndim == 1</span>
+        <span class="c1"># assert len(f) == len(self.x)</span>
+
+        <span class="k">return</span> <span class="n">rfft</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_irfft_basis</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="c1"># ========================= simple interpolation test</span>
+    <span class="c1"># build the grids</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># the nodes</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>  <span class="c1"># the interpolation points</span>
+
+    <span class="c1"># build the linear operators</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">LinearInterpolator1d</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dx</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xi</span><span class="o">=</span><span class="n">xi</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">CubicInterpolator1d</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dx</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xi</span><span class="o">=</span><span class="n">xi</span><span class="p">)</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">RFFTInterpolator1d</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dx</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xi</span><span class="o">=</span><span class="n">xi</span><span class="p">)</span>
+    <span class="c1"># pick some random values to attach to the nodes</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c1"># call the operators for these values</span>
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">P</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">ci</span> <span class="o">=</span> <span class="n">C</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">fi</span> <span class="o">=</span> <span class="n">F</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="c1"># compare the output</span>
+    <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s2">&quot;ko&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">fi</span><span class="p">,</span> <span class="s1">&#39;m-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Fourier&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># ========================= interpolation for stretching</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">0.01</span><span class="p">)</span>
+
+    <span class="n">P</span> <span class="o">=</span> <span class="n">LinearInterpolator1d</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dx</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xi</span><span class="o">=</span><span class="n">xi</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">CubicInterpolator1d</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dx</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xi</span><span class="o">=</span><span class="n">xi</span><span class="p">)</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">RFFTInterpolator1d</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dx</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xi</span><span class="o">=</span><span class="n">xi</span><span class="p">)</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span> <span class="o">/</span> <span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">P</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">ci</span> <span class="o">=</span> <span class="n">C</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">fi</span> <span class="o">=</span> <span class="n">F</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fi</span><span class="p">,</span> <span class="s1">&#39;m-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Fourier&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># ========================= interpolation of many signals at ones</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># the nodes</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>  <span class="c1"># the interpolation points</span>
+
+    <span class="n">P</span> <span class="o">=</span> <span class="n">LinearInterpolator1d</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dx</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xi</span><span class="o">=</span><span class="n">xi</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">CubicInterpolator1d</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dx</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xi</span><span class="o">=</span><span class="n">xi</span><span class="p">)</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">RFFTInterpolator1d</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dx</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xi</span><span class="o">=</span><span class="n">xi</span><span class="p">)</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">P</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">ci</span> <span class="o">=</span> <span class="n">C</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">fi</span> <span class="o">=</span> <span class="n">F</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>   <span class="c1"># WARNING : Fourier interp is not built the same way as the two other interpolators</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">ci</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">fi</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">n</span><span class="p">,</span> <span class="s2">&quot;ko&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">pi</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">n</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">ci</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">n</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">fi</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;m-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Fourier&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">n</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, M. Lehujeur, P. Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

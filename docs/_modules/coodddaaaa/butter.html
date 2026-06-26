@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coodddaaaa.butter &mdash; COoDddAaaa 1.4.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=02f2166e"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            COoDddAaaa
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme_link.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">COoDddAaaa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coodddaaaa.butter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coodddaaaa.butter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Modified after sigy 1.5.3, M.L. 21/04/2023</span>
+
+<span class="sd">Time / Fourier domain butterworth filter</span>
+<span class="sd">warning : the fourier domain filter has a slightly different response that the time domain one</span>
+<span class="sd">          comparing both reveals that the time domain filter may include a water-level that do not </span>
+<span class="sd">          not exist with fourier domain, this results in slight differences near the signal edges</span>
+<span class="sd">          taper the waveform properly fixes the difference</span>
+<span class="sd">TODO : use ba_analog ?</span>
+<span class="sd">TODO : use scipy.fft =&gt; parallel</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">butter</span><span class="p">,</span> <span class="n">sosfilt</span><span class="p">,</span> <span class="n">sosfiltfilt</span><span class="p">,</span> <span class="n">sosfreqz</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.fftpack</span><span class="w"> </span><span class="kn">import</span> <span class="n">fftfreq</span><span class="p">,</span> <span class="n">fft</span><span class="p">,</span> <span class="n">ifft</span><span class="p">,</span> <span class="n">fft2</span><span class="p">,</span> <span class="n">ifft2</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<div class="viewcode-block" id="ButterworthFilter">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.butter.ButterworthFilter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ButterworthFilter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param freqmin: lower frequency in Hz, or None for highpass filtering</span>
+<span class="sd">    :param freqmax: upper frequency in Hz, or None for lowpass filtering</span>
+<span class="sd">    :param sampling_rate: in Hz</span>
+<span class="sd">    :param order: of the filter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_sos</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_sampling_rate</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+        <span class="n">freqmin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> 
+        <span class="n">freqmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">sampling_rate</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> 
+        <span class="n">order</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.</span><span class="p">):</span>
+
+        <span class="n">nyquist</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sampling_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_freqmin</span> <span class="o">=</span> <span class="n">freqmin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_freqmax</span> <span class="o">=</span> <span class="n">freqmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_order</span> <span class="o">=</span> <span class="n">order</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span> <span class="o">=</span> <span class="n">sampling_rate</span>
+
+        <span class="k">if</span> <span class="n">freqmin</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">freqmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">freqmin</span><span class="p">,</span> <span class="n">freqmax</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">freqmin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">freqmax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sos</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="p">[</span><span class="n">freqmin</span> <span class="o">/</span> <span class="n">nyquist</span><span class="p">,</span> <span class="n">freqmax</span> <span class="o">/</span> <span class="n">nyquist</span><span class="p">],</span>
+                               <span class="n">output</span><span class="o">=</span><span class="s2">&quot;sos&quot;</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s2">&quot;band&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">freqmin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sos</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="p">[</span><span class="n">freqmin</span> <span class="o">/</span> <span class="n">nyquist</span><span class="p">],</span>
+                               <span class="n">output</span><span class="o">=</span><span class="s2">&quot;sos&quot;</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s2">&quot;high&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">freqmax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sos</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="p">[</span><span class="n">freqmax</span> <span class="o">/</span> <span class="n">nyquist</span><span class="p">],</span>
+                               <span class="n">output</span><span class="o">=</span><span class="s2">&quot;sos&quot;</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s2">&quot;low&quot;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">freqmin</span><span class="p">,</span> <span class="n">freqmax</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ButterworthFilter.timecall">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.butter.ButterworthFilter.timecall">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">timecall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">zerophase</span><span class="p">:</span>
+            <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">sosfilt</span><span class="p">(</span><span class="n">sos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sos</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+            <span class="c1"># filtered_data = lfilter(b=self.b, a=self.a, x=data, axis=axis)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">sosfiltfilt</span><span class="p">(</span><span class="n">sos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sos</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    
+    
+        <span class="k">return</span> <span class="n">filtered_data</span></div>
+
+
+<div class="viewcode-block" id="ButterworthFilter.response">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.butter.ButterworthFilter.response">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npts</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">input_domain</span><span class="o">=</span><span class="s2">&quot;fft&quot;</span><span class="p">,</span> <span class="n">qc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Almost equivalent to timecall</span>
+<span class="sd">        the response looks better than timecall, no water level applied</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">input_domain</span> <span class="o">==</span> <span class="s2">&quot;fft&quot;</span><span class="p">:</span>
+            <span class="n">freqs</span> <span class="o">=</span> <span class="n">fftfreq</span><span class="p">(</span><span class="n">npts</span><span class="p">,</span> <span class="mf">1.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span><span class="p">)</span>
+            <span class="c1"># equivalent to (except for freqs (0 to nyquist, no wrapping))</span>
+            <span class="c1"># freqs, response = sosfreqz(self._sos, worN=npts, whole=True, fs=self._sampling_rate)</span>
+
+        <span class="k">elif</span> <span class="n">input_domain</span> <span class="o">==</span> <span class="s2">&quot;rfft&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;warning : the behavior of scipy.fftpack.rfft &#39;</span>
+                <span class="s1">&#39;differs from scipy.fft.rfft&#39;</span><span class="p">)</span>
+            <span class="n">freqs</span> <span class="o">=</span> <span class="n">rfftfreq</span><span class="p">(</span><span class="n">npts</span><span class="p">,</span> <span class="mf">1.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">input_domain</span><span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="n">sosfreqz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sos</span><span class="p">,</span> <span class="n">worN</span><span class="o">=</span><span class="n">freqs</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">zerophase</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">response</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.</span>
+
+        <span class="k">if</span> <span class="n">qc</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">npts</span><span class="p">)</span>
+            <span class="n">filtered_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timecall</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="n">zerophase</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">input_domain</span> <span class="o">==</span> <span class="s2">&quot;fft&quot;</span><span class="p">:</span>
+                <span class="c1"># freqs = fftfreq(npts, 1./self._sampling_rate)</span>
+                <span class="n">tfdata</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">filtered_tfdata</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">input_domain</span> <span class="o">==</span> <span class="s2">&quot;rfft&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s1">&#39;warning : the behavior of scipy.fftpack.rfft &#39;</span>
+                    <span class="s1">&#39;differs from scipy.fft.rfft&#39;</span><span class="p">)</span>
+                <span class="c1"># freqs = fftfreq(npts, 1. / self._sampling_rate)</span>
+                <span class="n">tfdata</span> <span class="o">=</span> <span class="n">rfft</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">filtered_tfdata</span> <span class="o">=</span> <span class="n">rfft</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">input_domain</span><span class="p">)</span>
+
+            <span class="n">expected_response</span> <span class="o">=</span> <span class="n">filtered_tfdata</span> <span class="o">/</span> <span class="n">tfdata</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">zerophase</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">expected_response</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">expected_response</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">freqs</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">expected_response</span><span class="p">),</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">freqs</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">response</span><span class="p">),</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">freqs</span><span class="p">,</span> <span class="n">response</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">input_domain</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the filtered data</span>
+<span class="sd">        can be called on time domain (real or complex) data</span>
+<span class="sd">        fft or rfft transformed data (use input_domain)</span>
+
+<span class="sd">        :param data:</span>
+<span class="sd">        :param zerophase:</span>
+<span class="sd">        :param axis:</span>
+<span class="sd">        :param input_domain:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">input_domain</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">timecall</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="n">zerophase</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">input_domain</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fft&quot;</span><span class="p">,</span> <span class="s2">&quot;rfft&quot;</span><span class="p">]:</span>
+
+            <span class="k">if</span> <span class="n">input_domain</span> <span class="o">==</span> <span class="s2">&quot;rfft&quot;</span> <span class="ow">and</span> <span class="n">zerophase</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s1">&#39;warning : the behavior of scipy.fftpack.rfft &#39;</span>
+                    <span class="s1">&#39;differs from scipy.fft.rfft&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">input_domain</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">zerophase</span><span class="si">=}</span><span class="s2"> =&gt; complex =&gt; irfft not applicable&quot;</span><span class="p">)</span>
+
+            <span class="n">_</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="p">(</span>
+                <span class="n">npts</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">zerophase</span><span class="o">=</span><span class="n">zerophase</span><span class="p">,</span>
+                <span class="n">input_domain</span><span class="o">=</span><span class="n">input_domain</span><span class="p">,</span> <span class="n">qc</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">data</span> <span class="o">*</span> <span class="n">response</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">input_domain</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ButterworthFilter.show">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.butter.ButterworthFilter.show">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">freqs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">freqs</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="n">sosfreqz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sos</span><span class="p">,</span> <span class="n">worN</span><span class="o">=</span><span class="n">freqs</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span><span class="p">)</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+        <span class="n">bx</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">zerophase</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">response</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">response</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">bx</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">response</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;response modulus&#39;</span><span class="p">)</span>
+        <span class="n">bx</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;response phase&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">cx</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ax</span><span class="p">,</span> <span class="n">bx</span><span class="p">]:</span>
+            <span class="n">ylim</span> <span class="o">=</span> <span class="n">cx</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+            <span class="n">cx</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_freqmin</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">ylim</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">)</span>
+            <span class="n">cx</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_freqmax</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">ylim</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">)</span>
+            <span class="n">cx</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+            <span class="n">cx</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;frequency (Hz)&#39;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_freqmin</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_freqmax</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">zerophase</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+</div>
+
+        
+
+<div class="viewcode-block" id="BandpassFilter">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.butter.BandpassFilter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BandpassFilter</span><span class="p">(</span><span class="n">ButterworthFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Shortcut for ButterworthFilter for band-pass filtering</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freqmin</span><span class="p">,</span> <span class="n">freqmax</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">ButterworthFilter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">freqmin</span><span class="o">=</span><span class="n">freqmin</span><span class="p">,</span> <span class="n">freqmax</span><span class="o">=</span><span class="n">freqmax</span><span class="p">,</span>
+            <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="LowpassFilter">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.butter.LowpassFilter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LowpassFilter</span><span class="p">(</span><span class="n">ButterworthFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Shortcut for ButterworthFilter for low-pass filtering</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freqmax</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">ButterworthFilter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">freqmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">freqmax</span><span class="o">=</span><span class="n">freqmax</span><span class="p">,</span>
+            <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="HighpassFilter">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.butter.HighpassFilter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HighpassFilter</span><span class="p">(</span><span class="n">ButterworthFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Shortcut for ButterworthFilter for high-pass filtering</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freqmin</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">ButterworthFilter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">freqmin</span><span class="o">=</span><span class="n">freqmin</span><span class="p">,</span> <span class="n">freqmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal.windows</span><span class="w"> </span><span class="kn">import</span> <span class="n">tukey</span>
+
+    <span class="n">npts</span> <span class="o">=</span> <span class="mi">1200</span>
+    <span class="n">sampling_rate</span> <span class="o">=</span> <span class="mf">1.0123456</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">npts</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">*=</span> <span class="n">tukey</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">freqmin</span> <span class="o">=</span> <span class="mf">0.03</span>
+    <span class="n">freqmax</span> <span class="o">=</span> <span class="mf">0.08</span>
+    <span class="n">fftfreqs</span> <span class="o">=</span> <span class="n">fftfreq</span><span class="p">(</span><span class="n">npts</span><span class="p">,</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">sampling_rate</span><span class="p">)</span>
+
+    <span class="n">bp</span> <span class="o">=</span> <span class="n">BandpassFilter</span><span class="p">(</span><span class="n">freqmin</span><span class="o">=</span><span class="n">freqmin</span><span class="p">,</span> <span class="n">freqmax</span><span class="o">=</span><span class="n">freqmax</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="n">bp</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(),</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">bp</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(),</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">freqmin</span><span class="p">,</span> <span class="n">freqmin</span><span class="p">],</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">(),</span> <span class="s1">&#39;r--&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">freqmax</span><span class="p">,</span> <span class="n">freqmax</span><span class="p">],</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">(),</span> <span class="s1">&#39;r--&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bp</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ifft</span><span class="p">(</span><span class="n">bp</span><span class="p">(</span><span class="n">fft</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">input_domain</span><span class="o">=</span><span class="s2">&quot;fft&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="s2">&quot;g-&quot;</span><span class="p">)</span>
+    <span class="c1"># plt.plot(irfft(bp(rfft(data), zerophase=True, input_domain=&quot;rfft&quot;)).real, &quot;m--&quot;)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, M. Lehujeur, P. Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

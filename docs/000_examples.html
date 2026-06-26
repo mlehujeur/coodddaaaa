@@ -1,0 +1,1105 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo to use the Stretcher object &mdash; COoDddAaaa 1.4.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=02f2166e"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Application to noise correlation functions" href="001_noise_correlation_case.html" />
+    <link rel="prev" title="Examples" href="examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            COoDddAaaa
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme_link.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Sources</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="examples.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Demo to use the Stretcher object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Table-of-content">Table of content</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Modules-and-parameters">Modules and parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Modules">Modules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Parameters">Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Case-1-:-Find-the-best-stretching-between-a-reference-and-another-signal">Case 1 : Find the best stretching between a reference and another signal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Step1-:-Generate-the-reference-and-stretched-signals">Step1 : Generate the reference and stretched signals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Step2-:-Pre-compute-the-stretched-versions-of-the-reference">Step2 : Pre-compute the stretched versions of the reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Step-3:-Correlation-of-the-observed-signal-with-the-reference">Step 3: Correlation of the observed signal with the reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Results">Results</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Case-2-:-Find-the-stretching-history-in-a-b-scan-using-a-single-reference">Case 2 : Find the stretching history in a b-scan using a single reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Step-1-:-Generate-a-b-scan-with-varying-stretching-as-a-function-of-time">Step 1 : Generate a b-scan with varying stretching as a function of time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Step-2-:-Pre-compute-the-stretched-versions-of-the-reference.">Step 2 : Pre-compute the stretched versions of the reference.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Step-3-:-Correlate-all-signals-of-the-bscan-with-the-reference">Step 3 : Correlate all signals of the bscan with the reference</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Case-3-:-Find-the-stretching-history-in-a-b-scan-without-any-reference">Case 3 : Find the stretching history in a b-scan without any reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Compute-the-stretching-and-correlation-matrices">Compute the stretching and correlation matrices</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Case-4-:-Iterative-approach-:-Inverse-stretching">Case 4 : Iterative approach : Inverse stretching</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="001_noise_correlation_case.html">Application to noise correlation functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="002_clusterstretch.html">Strecthing based noise monitoring in the context of High noise variations</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">COoDddAaaa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">Demo to use the Stretcher object</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/000_examples.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Demo-to-use-the-Stretcher-object">
+<h1>Demo to use the Stretcher object<a class="headerlink" href="#Demo-to-use-the-Stretcher-object" title="Link to this heading"></a></h1>
+<section id="Table-of-content">
+<h2>Table of content<a class="headerlink" href="#Table-of-content" title="Link to this heading"></a></h2>
+<ol class="arabic" start="0">
+<li><p>Modules and parameters.</p></li>
+<li><div class="line-block">
+<div class="line">Case 1: Find the best stretching between a reference and another signal.</div>
+<div class="line">1.1. Step 1: Generate the reference and stretched signals.</div>
+<div class="line">1.2. Step 2: Pre-compute the stretched versions of the reference.</div>
+<div class="line">1.3. Step 3: Correlation of the observed signal with the reference.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">Case 2 : Find the stretching history in a b-scan using a single reference.</div>
+<div class="line">2.1. Step 1: Generate a b-scan with varying stretching as a function of time.</div>
+<div class="line">2.2. Step 2: Pre-compute the stretched versions of the reference.</div>
+<div class="line">2.3. Step 3: Correlate all signals of the bscan with the reference.</div>
+</div>
+</li>
+<li><p>Case 3 : Find the stretching history in a b-scan without any reference. [experimental]</p></li>
+<li><p>Case 4 : Iterative approach : Inverse-stretching</p></li>
+</ol>
+</section>
+<section id="Modules-and-parameters">
+<h2>Modules and parameters<a class="headerlink" href="#Modules-and-parameters" title="Link to this heading"></a></h2>
+<section id="Modules">
+<h3>Modules<a class="headerlink" href="#Modules" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">coodddaaaa.stretching</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stretcher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coodddaaaa.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span><span class="p">,</span> <span class="n">polyspace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coodddaaaa.butter</span><span class="w"> </span><span class="kn">import</span> <span class="n">BandpassFilter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coodddaaaa.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">TukeyWindow</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Parameters">
+<h3>Parameters<a class="headerlink" href="#Parameters" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ============ SAMPLING</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e-5</span>   <span class="c1"># start time in sec</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="mf">1e-6</span>  <span class="c1"># sampling interval, sec</span>
+<span class="n">nt</span> <span class="o">=</span> <span class="mi">512</span>   <span class="c1"># number of samples in time</span>
+<span class="n">time_array</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span>  <span class="c1"># seconds  (NEVER use np.linspace for time vectors)</span>
+
+<span class="c1"># ============ TIME WINDOW</span>
+<span class="n">tmin</span> <span class="o">=</span> <span class="mf">1e-4</span>   <span class="c1"># begin of time window in sec</span>
+<span class="n">tmax</span> <span class="o">=</span> <span class="mf">4e-4</span>   <span class="c1"># end of time window in sec</span>
+<span class="n">taper_start</span> <span class="o">=</span> <span class="n">tmin</span><span class="o">-</span><span class="mf">0.1</span><span class="o">*</span><span class="p">(</span><span class="n">tmax</span><span class="o">-</span><span class="n">tmin</span><span class="p">)</span>  <span class="c1"># start of the Tukey taper window</span>
+<span class="n">taper_end</span> <span class="o">=</span> <span class="n">tmax</span><span class="o">+</span><span class="mf">0.1</span><span class="o">*</span><span class="p">(</span><span class="n">tmax</span><span class="o">-</span><span class="n">tmin</span><span class="p">)</span>  <span class="c1"># end of the Tukey taper window</span>
+
+<span class="c1"># ============ FREQUENCY</span>
+<span class="n">fnyquist</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">/</span> <span class="n">dt</span>    <span class="c1"># Hz</span>
+<span class="n">fmin</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">fnyquist</span>   <span class="c1"># lower freq Hz</span>
+<span class="n">fmax</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">fnyquist</span>   <span class="c1"># upper freq Hz</span>
+
+<span class="c1"># ============ STRETCHING (epsilon)</span>
+<span class="n">eps_true</span> <span class="o">=</span> <span class="mf">0.00123456789</span>  <span class="c1"># the imposed stretching coeff to be recovered</span>
+
+<span class="c1"># Stretching search grid</span>
+<span class="n">eps_search_min</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.01</span>  <span class="c1"># min epsilon value (= -1% stretching)</span>
+<span class="n">eps_search_max</span> <span class="o">=</span> <span class="o">+</span><span class="mf">0.01</span>  <span class="c1"># max epsilon value (= +1% stretching)</span>
+<span class="n">n_eps</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># number of epsilon values to test</span>
+<span class="n">eps_pw</span> <span class="o">=</span> <span class="mf">1.2</span>  <span class="c1"># controls the distribution of epsiolon values in the grid, 1 means linear spacing of the eps grid, &gt; 1 means polynomial distribution of the grid</span>
+
+<span class="n">noise_level</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># level of noise added to the signal</span>
+
+<span class="n">interp_kind</span> <span class="o">=</span> <span class="s2">&quot;fourier&quot;</span>  <span class="c1"># or &#39;linear&#39;, &#39;cubic&#39;</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># create the time taper</span>
+<span class="n">win</span> <span class="o">=</span> <span class="n">TukeyWindow</span><span class="p">(</span><span class="n">taper_start</span><span class="p">,</span> <span class="n">tmin</span><span class="p">,</span> <span class="n">tmax</span><span class="p">,</span> <span class="n">taper_end</span><span class="p">)</span>
+<span class="n">taper</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">win</span><span class="p">(</span><span class="n">time_array</span><span class="p">)</span>
+
+<span class="c1"># and the callable bandpass filter</span>
+<span class="n">bandpass</span><span class="p">:</span> <span class="nb">callable</span> <span class="o">=</span> <span class="n">BandpassFilter</span><span class="p">(</span><span class="n">freqmin</span><span class="o">=</span><span class="n">fmin</span><span class="p">,</span> <span class="n">freqmax</span><span class="o">=</span><span class="n">fmax</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Case-1-:-Find-the-best-stretching-between-a-reference-and-another-signal">
+<h2>Case 1 : Find the best stretching between a reference and another signal<a class="headerlink" href="#Case-1-:-Find-the-best-stretching-between-a-reference-and-another-signal" title="Link to this heading"></a></h2>
+<section id="Step1-:-Generate-the-reference-and-stretched-signals">
+<h3>Step1 : Generate the reference and stretched signals<a class="headerlink" href="#Step1-:-Generate-the-reference-and-stretched-signals" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build the reference band-pass / tapered coda</span>
+<span class="n">y_reference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span>   <span class="c1"># white Gaussian noise</span>
+<span class="n">y_reference</span> <span class="o">=</span> <span class="n">bandpass</span><span class="p">(</span><span class="n">y_reference</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># bandpass</span>
+<span class="n">y_reference</span> <span class="o">*=</span> <span class="n">taper</span>  <span class="c1"># apply the Tukey taper</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build the observed signal, a stretched version of it + noise</span>
+
+<span class="c1"># stretcher0 is used to generate a stretched signal (norm=False),</span>
+<span class="c1"># do not use it for stretching-based correlation below</span>
+<span class="n">stretcher0</span> <span class="o">=</span> <span class="n">Stretcher</span><span class="p">(</span><span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">eps_true</span><span class="p">]),</span> <span class="n">norm</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># get the signal stretched by eps_true,</span>
+<span class="n">y_observed</span> <span class="o">=</span> <span class="n">stretcher0</span><span class="o">.</span><span class="n">stretch</span><span class="p">(</span><span class="n">y_reference</span><span class="p">)</span>
+
+<span class="c1"># there is only one trace here (i.e. one row in y_observed),</span>
+<span class="c1"># because stretcher0.eps has only one item</span>
+<span class="n">y_observed</span> <span class="o">=</span> <span class="n">y_observed</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1"># add noise in the bandwidth only</span>
+<span class="n">y_observed</span> <span class="o">+=</span> <span class="n">bandpass</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span> <span class="o">*</span> <span class="n">noise_level</span><span class="p">)</span> <span class="o">*</span> <span class="n">taper</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_array</span><span class="p">,</span> <span class="n">y_reference</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;reference&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_array</span><span class="p">,</span> <span class="n">y_observed</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;observed&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_11_0.png" src="_images/000_examples_11_0.png" />
+</div>
+</div>
+</section>
+<section id="Step2-:-Pre-compute-the-stretched-versions-of-the-reference">
+<h3>Step2 : Pre-compute the stretched versions of the reference<a class="headerlink" href="#Step2-:-Pre-compute-the-stretched-versions-of-the-reference" title="Link to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build the stretching basis of the reference signal</span>
+
+<span class="c1"># epsilon search grid</span>
+<span class="c1"># polyspace let you increase the grid resolution near eps=0, pwr=1 means linear scale</span>
+<span class="n">eps_search</span> <span class="o">=</span> <span class="n">polyspace</span><span class="p">(</span>
+    <span class="n">xmin</span><span class="o">=</span><span class="n">eps_search_min</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="n">eps_search_max</span><span class="p">,</span>
+    <span class="n">nx</span><span class="o">=</span><span class="n">n_eps</span><span class="p">,</span>
+    <span class="n">pwr</span><span class="o">=</span><span class="n">eps_pw</span><span class="p">)</span>
+
+<span class="c1"># Build the stretcher object for correlation this time (norm=True)</span>
+<span class="c1"># (do not use stretcher0 which is not normalized)</span>
+<span class="c1"># Most costly operations are performed here, once for all</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;Build the stretcher object&#39;</span><span class="p">):</span>
+    <span class="n">stretcher</span> <span class="o">=</span> <span class="n">Stretcher</span><span class="p">(</span>
+        <span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>
+        <span class="n">eps</span><span class="o">=</span><span class="n">eps_search</span><span class="p">,</span>
+        <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">interp_kind</span><span class="o">=</span><span class="n">interp_kind</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;Compute the stretched reference basis&#39;</span><span class="p">):</span>
+    <span class="n">y_reference_stretched</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">stretch</span><span class="p">(</span><span class="n">y_reference</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timer[Build the stretcher object]: 599.53 ms
+Timer[Compute the stretched reference basis]: 8.54 ms
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;$ \epsilon $&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span>
+    <span class="n">stretcher</span><span class="o">.</span><span class="n">t</span><span class="p">,</span>
+    <span class="n">stretcher</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span>
+    <span class="n">y_reference_stretched</span><span class="p">,</span>
+    <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">);</span>
+
+<span class="c1"># show the epsilon grid as ticks on yaxis</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_search</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="n">eps_search</span><span class="p">,</span> <span class="s2">&quot;k_&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$t \mapsto y^</span><span class="si">{ref}</span><span class="s1">(t (1 + \epsilon)) $&#39;</span><span class="p">)</span>
+<span class="n">bx</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">())</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Stretching [%]&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_14_0.png" src="_images/000_examples_14_0.png" />
+</div>
+</div>
+</section>
+<section id="Step-3:-Correlation-of-the-observed-signal-with-the-reference">
+<h3>Step 3: Correlation of the observed signal with the reference<a class="headerlink" href="#Step-3:-Correlation-of-the-observed-signal-with-the-reference" title="Link to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Correlate observed with reference</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;Normalized correlation&#39;</span><span class="p">):</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">y_observed</span><span class="p">,</span> <span class="n">y_reference_stretched</span><span class="p">)</span>  <span class="c1"># correlation function, 1d, shape (neps, )</span>
+
+<span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;Find the max of correlation with subsamp precision&#39;</span><span class="p">):</span>
+    <span class="n">eps_max</span><span class="p">,</span> <span class="n">c_max</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">corrmax</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>  <span class="c1"># 2 floats</span>
+
+<span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;Compute Uncertainty&#39;</span><span class="p">):</span>
+    <span class="n">eps_unc</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">stretching_uncertainty</span><span class="p">(</span>
+        <span class="n">c_max</span><span class="p">,</span> <span class="n">fmin</span><span class="o">=</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="n">fmax</span><span class="p">,</span> <span class="n">tmin</span><span class="o">=</span><span class="n">tmin</span><span class="p">,</span> <span class="n">tmax</span><span class="o">=</span><span class="n">tmax</span><span class="p">)</span>  <span class="c1"># float</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timer[Normalized correlation]: 0.27 ms
+Timer[Find the max of correlation with subsamp precision]: 0.12 ms
+Timer[Compute Uncertainty]: 0.03 ms
+</pre></div></div>
+</div>
+</section>
+<section id="Results">
+<h3>Results<a class="headerlink" href="#Results" title="Link to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;expected stretching: </span><span class="si">{</span><span class="n">eps_true</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;obtained stretching: </span><span class="si">{</span><span class="n">eps_max</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;estimated stretching uncertainty: </span><span class="si">{</span><span class="n">eps_unc</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;normalized correlation coefficient: </span><span class="si">{</span><span class="n">c_max</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+expected stretching: eps_true=0.00123456789
+obtained stretching: eps_max=0.00139463230689957
+estimated stretching uncertainty: eps_unc=0.0001274350616099737
+normalized correlation coefficient: c_max=0.898521654975452
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">gs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_gridspec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xlabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$ X(\epsilon) $&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;$ \epsilon = \mathrm</span><span class="si">{d}</span><span class="s2">v/v = -\mathrm</span><span class="si">{d}</span><span class="s2">t/t $&quot;</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;stretched reference&quot;</span><span class="p">)</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span> <span class="s1">&#39;+-&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c_max</span><span class="p">,</span> <span class="n">eps_max</span><span class="p">,</span> <span class="s2">&quot;r*&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">c_max</span><span class="p">,</span> <span class="n">c_max</span><span class="p">],</span> <span class="p">[</span><span class="n">eps_max</span><span class="o">-</span><span class="n">eps_unc</span><span class="p">,</span> <span class="n">eps_max</span><span class="o">+</span><span class="n">eps_unc</span><span class="p">],</span> <span class="s2">&quot;r_-&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">(),</span> <span class="p">[</span><span class="n">eps_max</span><span class="p">,</span> <span class="n">eps_max</span><span class="p">],</span> <span class="s1">&#39;r--&#39;</span><span class="p">)</span>
+
+<span class="n">ax2</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">stretcher</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span> <span class="n">y_reference_stretched</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">);</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_array</span><span class="p">,</span> <span class="mf">0.0005</span> <span class="o">*</span> <span class="n">y_observed</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y_observed</span><span class="p">)</span> <span class="o">+</span> <span class="n">eps_max</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$ y^</span><span class="si">{obs}</span><span class="s2"> $&quot;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+
+
+<span class="n">bx</span> <span class="o">=</span> <span class="n">ax2</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ax2</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">())</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Stretching [%]&#39;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">ax2</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">(),</span> <span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">);</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_19_0.png" src="_images/000_examples_19_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># ZOOM IN</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$ X(\epsilon) $&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$ \epsilon = \mathrm</span><span class="si">{d}</span><span class="s2">v/v $&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Zoom&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span> <span class="s1">&#39;+-&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">(),</span> <span class="p">[</span><span class="n">eps_true</span><span class="p">,</span> <span class="n">eps_true</span><span class="p">],</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;True eps&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c_max</span><span class="p">,</span> <span class="n">eps_max</span><span class="p">,</span> <span class="s2">&quot;r*&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">(),</span> <span class="p">[</span><span class="n">eps_max</span><span class="p">,</span> <span class="n">eps_max</span><span class="p">],</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Estimated eps&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">c_max</span><span class="p">,</span> <span class="n">c_max</span><span class="p">],</span> <span class="p">[</span><span class="n">eps_max</span><span class="o">-</span><span class="n">eps_unc</span><span class="p">,</span> <span class="n">eps_max</span><span class="o">+</span><span class="n">eps_unc</span><span class="p">],</span> <span class="s2">&quot;r_-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Estimated Uncertainty&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">((</span><span class="n">c_max</span> <span class="o">-</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">c_max</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">((</span><span class="n">eps_max</span> <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">eps_unc</span><span class="p">,</span> <span class="n">eps_max</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">eps_unc</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+
+<span class="n">bx</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">())</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Stretching [%]&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_20_0.png" src="_images/000_examples_20_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Case-2-:-Find-the-stretching-history-in-a-b-scan-using-a-single-reference">
+<h2>Case 2 : Find the stretching history in a b-scan using a single reference<a class="headerlink" href="#Case-2-:-Find-the-stretching-history-in-a-b-scan-using-a-single-reference" title="Link to this heading"></a></h2>
+<section id="Step-1-:-Generate-a-b-scan-with-varying-stretching-as-a-function-of-time">
+<h3>Step 1 : Generate a b-scan with varying stretching as a function of time<a class="headerlink" href="#Step-1-:-Generate-a-b-scan-with-varying-stretching-as-a-function-of-time" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Genereate a synthetic stretching history</span>
+<span class="n">n_traces</span> <span class="o">=</span> <span class="mi">256</span>  <span class="c1"># number of traces</span>
+
+<span class="n">eps_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">,</span> <span class="n">n_traces</span><span class="p">)</span>
+<span class="n">eps_history</span> <span class="o">+=</span> <span class="mf">0.0003</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">)</span> <span class="o">/</span> <span class="mi">150</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">)</span><span class="o">-</span><span class="n">n_traces</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">20.</span>
+<span class="n">eps_history</span> <span class="o">+=</span> <span class="o">-</span><span class="mf">0.0009</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;True $ \epsilon $&#39;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Trace num.&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_history</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">bx</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">())</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Stretching [%]&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_24_0.png" src="_images/000_examples_24_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build the synthetic bscan by stretching the reference, add noise</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;Build the stretcher to generate the bscan&#39;</span><span class="p">):</span>
+    <span class="n">stretcher0</span> <span class="o">=</span> <span class="n">Stretcher</span><span class="p">(</span><span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps_history</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">interp_kind</span><span class="o">=</span><span class="n">interp_kind</span><span class="p">)</span>
+
+<span class="n">ascan</span> <span class="o">=</span> <span class="n">bandpass</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_traces</span><span class="p">,</span> <span class="n">nt</span><span class="p">))</span> <span class="o">*</span> <span class="n">taper</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;Generate the bscan&#39;</span><span class="p">):</span>
+    <span class="n">bscan</span> <span class="o">=</span> <span class="n">stretcher0</span><span class="o">.</span><span class="n">stretch</span><span class="p">(</span><span class="n">ascan</span><span class="p">)</span>
+
+<span class="n">bscan</span> <span class="o">+=</span> <span class="n">bandpass</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_traces</span><span class="p">,</span> <span class="n">nt</span><span class="p">)</span> <span class="o">*</span> <span class="n">noise_level</span><span class="p">)</span>
+<span class="n">bscan</span> <span class="o">*=</span> <span class="n">taper</span>
+
+<span class="c1"># bscan[:n_traces//3] += bandpass(np.random.randn(n_traces//3,nt) * noise_level * 4.)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timer[Build the stretcher to generate the bscan]: 1579.54 ms
+Timer[Generate the bscan]: 679.18 ms
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">gs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_gridspec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xlabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$ \epsilon = \mathrm</span><span class="si">{d}</span><span class="s2">t/t $&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Trace Num.&quot;</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;time (s)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Observed bscan&quot;</span><span class="p">)</span>
+<span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;time (s)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Zoom&quot;</span><span class="p">)</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_history</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">stretcher</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">bscan</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">);</span>
+
+<span class="n">ax3</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">stretcher</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">bscan</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">);</span>
+<span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">tmin</span> <span class="o">+</span> <span class="mf">0.8</span> <span class="o">*</span> <span class="p">(</span><span class="n">tmax</span> <span class="o">-</span> <span class="n">tmin</span><span class="p">),</span> <span class="n">tmin</span> <span class="o">+</span> <span class="mf">0.84</span> <span class="o">*</span> <span class="p">(</span><span class="n">tmax</span> <span class="o">-</span> <span class="n">tmin</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span><span class="n">ax2</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">(),</span> <span class="p">[</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmin</span><span class="p">],</span> <span class="p">[</span><span class="n">xmax</span><span class="p">,</span> <span class="n">xmax</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+
+
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">]:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">(),</span> <span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">]:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">(),</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=-</span><span class="mi">25</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+<span class="n">bx</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twiny</span><span class="p">()</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">())</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Stretching [%]&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_26_0.png" src="_images/000_examples_26_0.png" />
+</div>
+</div>
+</section>
+<section id="Step-2-:-Pre-compute-the-stretched-versions-of-the-reference.">
+<h3>Step 2 : Pre-compute the stretched versions of the reference.<a class="headerlink" href="#Step-2-:-Pre-compute-the-stretched-versions-of-the-reference." title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Choose a reference signal in the bscan (first trace)</span>
+<span class="n">i_reference</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">y_reference</span> <span class="o">=</span> <span class="n">bscan</span><span class="p">[</span><span class="n">i_reference</span><span class="p">,</span> <span class="p">:]</span>   <span class="c1"># so that the reference also includes noise</span>
+<span class="k">assert</span> <span class="n">eps_history</span><span class="p">[</span><span class="n">i_reference</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build the stretching basis of the reference signal</span>
+
+<span class="c1"># epsilon search grid</span>
+<span class="n">eps_search</span> <span class="o">=</span> <span class="n">polyspace</span><span class="p">(</span>
+    <span class="n">xmin</span><span class="o">=</span><span class="n">eps_search_min</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="n">eps_search_max</span><span class="p">,</span>
+    <span class="n">nx</span><span class="o">=</span><span class="n">n_eps</span><span class="p">,</span>
+    <span class="n">pwr</span><span class="o">=</span><span class="n">eps_pw</span><span class="p">)</span>
+
+<span class="c1"># for correlation this time (do not use stretcher0)</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;Build the stretcher object&#39;</span><span class="p">):</span>
+    <span class="n">stretcher</span> <span class="o">=</span> <span class="n">Stretcher</span><span class="p">(</span><span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps_search</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">interp_kind</span><span class="o">=</span><span class="n">interp_kind</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;Compute the stretched reference basis&#39;</span><span class="p">):</span>
+    <span class="n">y_reference_stretched</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">stretch</span><span class="p">(</span><span class="n">y_reference</span><span class="p">)</span>  <span class="c1"># compute the stretching basis of the reference</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timer[Build the stretcher object]: 600.43 ms
+Timer[Compute the stretched reference basis]: 8.44 ms
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display (same as above)</span>
+<span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time (s)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$ \epsilon $&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">stretcher</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span> <span class="n">y_reference_stretched</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">);</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_search</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="n">eps_search</span><span class="p">,</span> <span class="s2">&quot;k_&quot;</span><span class="p">);</span> <span class="c1"># show the epsilon grid as ticks on yaxis</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Step-3-:-Correlate-all-signals-of-the-bscan-with-the-reference">
+<h3>Step 3 : Correlate all signals of the bscan with the reference<a class="headerlink" href="#Step-3-:-Correlate-all-signals-of-the-bscan-with-the-reference" title="Link to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Correlate all traces to the reference</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Correlate and find maxima in a bscan of </span><span class="si">{</span><span class="n">n_traces</span><span class="si">}</span><span class="s1"> traces with a single reference&#39;</span><span class="p">):</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">bscan</span><span class="p">,</span> <span class="n">y_reference_stretched</span><span class="p">)</span>
+    <span class="n">eps_max_history</span><span class="p">,</span> <span class="n">c_max_history</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">corrmax</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">eps_unc_history</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">stretching_uncertainty</span><span class="p">(</span>
+        <span class="n">cmax</span><span class="o">=</span><span class="n">c_max_history</span><span class="p">,</span> <span class="n">fmin</span><span class="o">=</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="n">fmax</span><span class="p">,</span> <span class="n">tmin</span><span class="o">=</span><span class="n">tmin</span><span class="p">,</span> <span class="n">tmax</span><span class="o">=</span><span class="n">tmax</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timer[Correlate and find maxima in a bscan of 256 traces with a single reference]: 16.09 ms
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax1</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;$ \epsilon = \mathrm</span><span class="si">{d}</span><span class="s2">v/v $&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">eps_history</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;True epsilon&quot;</span><span class="p">)</span>
+<span class="n">hdl</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">eps_max_history</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Estimated epsilon&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span>
+    <span class="n">y1</span><span class="o">=</span><span class="n">eps_max_history</span><span class="o">-</span><span class="n">eps_unc_history</span><span class="p">,</span>
+    <span class="n">y2</span><span class="o">=</span><span class="n">eps_max_history</span><span class="o">+</span><span class="n">eps_unc_history</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="n">hdl</span><span class="o">.</span><span class="n">get_color</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Estimated uncertainty&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;$ X(\epsilon) $&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Trace Num.&quot;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">c_max_history</span><span class="p">);</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+
+<span class="n">bx</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">())</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Stretching [%]&#39;</span><span class="p">);</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_33_0.png" src="_images/000_examples_33_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display the full correlation function to track possible cycle skip effects when the stretching is</span>
+<span class="c1"># very strong relative to the time period in the late coda part</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;$ \epsilon = \mathrm</span><span class="si">{d}</span><span class="s2">v/v $&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Trace Num.&quot;</span><span class="p">)</span>
+
+<span class="n">coll</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;RdGy&#39;</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Correlation Coeff.&quot;</span><span class="p">)</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">eps_history</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;True epsilon&quot;</span><span class="p">)</span>
+
+<span class="n">hdl</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">eps_max_history</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Estimated epsilon&quot;</span><span class="p">)</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span>
+    <span class="n">y1</span><span class="o">=</span><span class="n">eps_max_history</span><span class="o">-</span><span class="n">eps_unc_history</span><span class="p">,</span>
+    <span class="n">y2</span><span class="o">=</span><span class="n">eps_max_history</span><span class="o">+</span><span class="n">eps_unc_history</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="n">hdl</span><span class="o">.</span><span class="n">get_color</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Estimated uncertainty&quot;</span><span class="p">)</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+<span class="n">bx</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">())</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Stretching [%]&#39;</span><span class="p">);</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_34_0.png" src="_images/000_examples_34_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Case-3-:-Find-the-stretching-history-in-a-b-scan-without-any-reference">
+<h2>Case 3 : Find the stretching history in a b-scan without any reference<a class="headerlink" href="#Case-3-:-Find-the-stretching-history-in-a-b-scan-without-any-reference" title="Link to this heading"></a></h2>
+<p>(under development): The approach is similar to Brenguier et al., 2014 (supp. mat.) except that we consider that solving a least square inverse problem is not necessary to infer the stretching history from the cross-stretching matrix as the problem is well posed.</p>
+<div class="line-block">
+<div class="line">We note $ y_i(t) $ the signal measured at calendar time $ T_i $.</div>
+<div class="line">The stretching correlation function is defined following Weaver et al., 2011 :</div>
+</div>
+<div class="math notranslate nohighlight">
+\[\left\{ y_i, y_j \right\}(\varepsilon) =
+X_{ij}(\varepsilon) =
+\frac
+    {\int y_i(t \times (1+\varepsilon)) . y_j(t) \, dt }
+    {\sqrt{
+        \int y_i^2(t) \, dt
+        \int y_j^2(t) \, dt }}\]</div>
+<p>The stretching coefficient matrix gives the best stretching coefficient for each pair of times <span class="math notranslate nohighlight">\(Ti,Tj\)</span></p>
+<div class="math notranslate nohighlight">
+\[\varepsilon_{ij} = argmax[X_{ij}(\varepsilon)]\]</div>
+<p>The correlation coefficient matrix is the maximum of the normalized stretching correlation for each pair of times <span class="math notranslate nohighlight">\(Ti,Tj\)</span></p>
+<div class="math notranslate nohighlight">
+\[C_{ij} = X_{ij}(\varepsilon_{ij})\]</div>
+<p>If the source is stable in time, the signals at calendar times $ T_i $ and $ T_j $ are two stretched version of the same reference $ u_0 $, thus</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\left\{
+\begin{aligned}
+y_i(t) &amp;= u_0(t \times (1 + \varepsilon^{true}(T_i))  \\
+y_j(t) &amp;= u_0(t \times (1 + \varepsilon^{true}(T_j)) \\
+\end{aligned}
+\right.\end{split}\]</div>
+<p>Then, one can show that</p>
+<div class="math notranslate nohighlight">
+\[X_{ij}(\varepsilon) \approx \left\{ u_0, u_0 \right\}\left(\varepsilon + \varepsilon^{true}(T_{i}) - \varepsilon^{true}(T_{j}) + \mathcal{O}(\varepsilon^{2})\right)\]</div>
+<p>As the auto-stretching-correlation of <span class="math notranslate nohighlight">\(u_0\)</span> peaks at <span class="math notranslate nohighlight">\(\varepsilon=0\)</span>, then</p>
+<div class="math notranslate nohighlight">
+\[\varepsilon_{ij} = argmax [X_{ij}] \approx \varepsilon^{true}(T_{j}) - \varepsilon^{true}(T_{i}) + \mathcal{O}(\varepsilon^{2})\]</div>
+<p>The zero-mean stretching history can be obtained by averaging vertically (or horizontally) the stretching matrix :</p>
+<div class="math notranslate nohighlight">
+\[\varepsilon^{true}(T_{j}) - \left&lt; \varepsilon^{true} \right&gt; \approx \frac{1}{N} \sum_{i=0}^{N-1} \varepsilon_{ij}\]</div>
+<p>One can improve this averaging by weighting the stretching measurements by the correlation coefficients (no Einstein summation)</p>
+<div class="math notranslate nohighlight">
+\[\varepsilon^{true}(T_{j}) - \left&lt; \varepsilon^{true} \right&gt; \approx \frac {\sum_{i=0}^{N-1} C_{ij}^\gamma \times \varepsilon_{ij} } {\sum_{i=0}^{N-1} C_{ij}^\gamma }\]</div>
+<p>where $ :nbsphinx-math:<a href="#id1"><span class="problematic" id="id2">`</span></a>gamma <a href="#id3"><span class="problematic" id="id4">`</span></a>$ is a power coefficient used to increase the weight of the best fitting pairs of correlation functions</p>
+<section id="Compute-the-stretching-and-correlation-matrices">
+<h3>Compute the stretching and correlation matrices<a class="headerlink" href="#Compute-the-stretching-and-correlation-matrices" title="Link to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;Correlate all pairs of traces in the bscan&#39;</span><span class="p">):</span>
+    <span class="n">c_triu</span><span class="p">,</span> <span class="n">e_triu</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">corr_all_with_all</span><span class="p">(</span><span class="n">bscan</span><span class="p">)</span>
+
+<span class="c1"># convert to square arrays</span>
+<span class="n">c2d</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">triu2dense</span><span class="p">(</span><span class="n">c_triu</span><span class="p">,</span> <span class="n">symetric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">diag</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">e2d</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">triu2dense</span><span class="p">(</span><span class="n">e_triu</span><span class="p">,</span> <span class="n">symetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">diag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timer[Correlate all pairs of traces in the bscan]: 4395.92 ms
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;$ C=argmax ( X(\epsilon) ) $&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Trace Num.&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Trace Num.&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">c2d</span><span class="p">,</span>
+               <span class="n">vmin</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+               <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;viridis&#39;</span><span class="p">)))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;$ \epsilon = \mathrm</span><span class="si">{d}</span><span class="s2">v/v $&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Trace Num.&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Trace Num.&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">e2d</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e2d</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+        <span class="n">vmax</span><span class="o">=+</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e2d</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;RdBu&#39;</span><span class="p">))</span>
+    <span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_47_0.png" src="_images/000_examples_47_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># recover the stretching history</span>
+<span class="n">eps_mean_history</span> <span class="o">=</span> <span class="p">(</span><span class="n">e2d</span> <span class="o">-</span> <span class="n">e2d</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">eps_std_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">e2d</span> <span class="o">-</span> <span class="n">e2d</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Trace Num.&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$ \epsilon = \mathrm</span><span class="si">{d}</span><span class="s2">v/v $&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_history</span> <span class="o">-</span> <span class="n">eps_history</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$ \mathrm</span><span class="si">{True}</span><span class="s2">\,\epsilon -  &lt; \mathrm</span><span class="si">{True}</span><span class="s2">\,\epsilon &gt; $&quot;</span><span class="p">)</span>
+
+<span class="c1"># replot single reference version</span>
+<span class="n">hdl</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_max_history</span> <span class="o">-</span> <span class="n">eps_max_history</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Single reference&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">eps_max_history</span><span class="p">)),</span>
+    <span class="n">y1</span><span class="o">=</span><span class="n">eps_max_history</span><span class="o">-</span> <span class="n">eps_max_history</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">-</span><span class="n">eps_unc_history</span> <span class="p">,</span>
+    <span class="n">y2</span><span class="o">=</span><span class="n">eps_max_history</span><span class="o">-</span> <span class="n">eps_max_history</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">+</span><span class="n">eps_unc_history</span> <span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="n">hdl</span><span class="o">.</span><span class="n">get_color</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Estimated uncertainty (single ref)&quot;</span><span class="p">)</span>
+
+<span class="c1"># add results for this section</span>
+<span class="n">hdl</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_mean_history</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;No reference (mean)&quot;</span><span class="p">)</span>
+<span class="c1">#hdl, = plt.plot(emed, label=&quot;No reference (median)&quot;)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">eps_mean_history</span><span class="p">)),</span>
+    <span class="n">y1</span><span class="o">=</span><span class="n">eps_mean_history</span><span class="o">-</span><span class="n">eps_std_history</span><span class="p">,</span>
+    <span class="n">y2</span><span class="o">=</span><span class="n">eps_mean_history</span><span class="o">+</span><span class="n">eps_std_history</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="n">hdl</span><span class="o">.</span><span class="n">get_color</span><span class="p">(),</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Statistical uncertainty (no ref)&quot;</span><span class="p">)</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.002</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">);</span>
+
+<span class="n">bx</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">())</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Stretching [%]&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_48_0.png" src="_images/000_examples_48_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Case-4-:-Iterative-approach-:-Inverse-stretching">
+<h2>Case 4 : Iterative approach : Inverse stretching<a class="headerlink" href="#Case-4-:-Iterative-approach-:-Inverse-stretching" title="Link to this heading"></a></h2>
+<div class="line-block">
+<div class="line">An attempt to simulate the case where the reference signal is difficult to choose (varying noise sources, huge stretching variations, …)</div>
+<div class="line">and where the matrix approach above is too expensive,</div>
+</div>
+<ul class="simple">
+<li><p>We first evaluate the reference signal by taking the average of the bscan</p></li>
+<li><p>The stretching history is estimated as usual, by correlation with the reference</p></li>
+<li><p>Then the bscan is corrected from the estimated stretching history (i.e. de-stretched) and averaged again to refine the estimate of the reference. The process can be iterated until the energy of the reference converges.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Genereate a synthetic stretching history</span>
+<span class="n">n_traces</span> <span class="o">=</span> <span class="mi">1024</span>  <span class="c1"># number of traces</span>
+
+<span class="n">eps_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">,</span> <span class="n">n_traces</span><span class="p">)</span>
+<span class="n">eps_history</span> <span class="o">+=</span> <span class="mf">0.0003</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">)</span> <span class="o">/</span> <span class="mi">150</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">)</span><span class="o">-</span><span class="n">n_traces</span><span class="o">*</span><span class="mi">2</span><span class="o">//</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">20.</span>
+<span class="n">eps_history</span> <span class="o">+=</span> <span class="o">-</span><span class="mf">0.002</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">eps_history</span> <span class="o">*=</span> <span class="mi">20</span>  <span class="c1"># simulate huge stretching rates</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build the synthetic bscan by stretching the reference, add noise</span>
+<span class="n">stretcher0</span> <span class="o">=</span> <span class="n">Stretcher</span><span class="p">(</span><span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps_history</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">interp_kind</span><span class="o">=</span><span class="n">interp_kind</span><span class="p">)</span>
+
+<span class="n">ascan</span> <span class="o">=</span> <span class="n">bandpass</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">nt</span><span class="p">))</span> <span class="o">*</span> <span class="n">taper</span>
+<span class="n">bscan</span> <span class="o">=</span> <span class="n">stretcher0</span><span class="o">.</span><span class="n">stretch</span><span class="p">(</span><span class="n">ascan</span><span class="p">)</span>
+
+<span class="n">bscan</span> <span class="o">+=</span> <span class="n">bandpass</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_traces</span><span class="p">,</span> <span class="n">nt</span><span class="p">)</span> <span class="o">*</span> <span class="n">noise_level</span><span class="p">)</span>
+<span class="n">bscan</span><span class="p">[:</span><span class="n">n_traces</span><span class="o">//</span><span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="n">bandpass</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_traces</span><span class="o">//</span><span class="mi">3</span><span class="p">,</span><span class="n">nt</span><span class="p">)</span> <span class="o">*</span> <span class="n">noise_level</span> <span class="o">*</span> <span class="mf">4.</span><span class="p">)</span>
+<span class="n">bscan</span> <span class="o">*=</span> <span class="n">taper</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">gs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_gridspec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xlabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$ \epsilon = \mathrm</span><span class="si">{d}</span><span class="s2">v/v $&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Trace Num.&quot;</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;time (s)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Observed bscan&quot;</span><span class="p">)</span>
+<span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;time (s)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Zoom&quot;</span><span class="p">)</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_history</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">stretcher</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">bscan</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">);</span>
+
+<span class="n">ax3</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">stretcher</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">bscan</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">);</span>
+<span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">tmin</span> <span class="o">+</span> <span class="mf">0.8</span> <span class="o">*</span> <span class="p">(</span><span class="n">tmax</span> <span class="o">-</span> <span class="n">tmin</span><span class="p">),</span> <span class="n">tmin</span> <span class="o">+</span> <span class="mf">0.84</span> <span class="o">*</span> <span class="p">(</span><span class="n">tmax</span> <span class="o">-</span> <span class="n">tmin</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span><span class="n">ax2</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">(),</span> <span class="p">[</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmin</span><span class="p">],</span> <span class="p">[</span><span class="n">xmax</span><span class="p">,</span> <span class="n">xmax</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">]:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">(),</span> <span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">]:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">(),</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=-</span><span class="mi">25</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+<span class="n">bx</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twiny</span><span class="p">()</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">())</span><span class="o">*</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">bx</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Stretching [%]&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_53_0.png" src="_images/000_examples_53_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build the stretching basis of the reference signal</span>
+<span class="n">eps_search</span> <span class="o">=</span> <span class="n">polyspace</span><span class="p">(</span><span class="n">eps_search_min</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="n">eps_search_max</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="n">n_eps</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="n">eps_pw</span><span class="p">)</span>
+<span class="n">stretcher</span> <span class="o">=</span> <span class="n">Stretcher</span><span class="p">(</span><span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps_search</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">interp_kind</span><span class="o">=</span><span class="n">interp_kind</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Take the average bscan as reference to start the process</span>
+<span class="n">y_reference</span> <span class="o">=</span> <span class="n">bscan</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># the reference might not be optimal if some traces are bad</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">coodddaaaa.stretching</span><span class="w"> </span><span class="kn">import</span> <span class="n">InverseStretcher</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+<span class="n">gs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_gridspec</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;#iteration&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;reference signal&quot;</span><span class="p">)</span>
+<span class="n">bx1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;convergence&quot;</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$ \epsilon = \mathrm</span><span class="si">{d}</span><span class="s2">v/v $&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Trace num.&quot;</span><span class="p">)</span>
+<span class="c1">#ax3 = ax2.twinx(); ax3.set_ylabel(&quot;Corr. Coeff&quot;)</span>
+<span class="n">ax3</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$ Corr. Coeff $&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Trace num.&quot;</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">hdl</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_array</span><span class="p">,</span> <span class="n">y_reference</span> <span class="o">+</span> <span class="n">_</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;iter #</span><span class="si">{</span><span class="n">_</span><span class="si">:</span><span class="s2">1d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">bx1</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="n">y_reference</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">_</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">hdl</span><span class="o">.</span><span class="n">get_color</span><span class="p">())</span>
+
+    <span class="c1"># compute the stretching basis of the current version of the reference</span>
+    <span class="n">y_reference_stretched</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">stretch</span><span class="p">(</span><span class="n">y_reference</span><span class="p">)</span>
+
+    <span class="c1"># correlate the bscan with it</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">bscan</span><span class="p">,</span> <span class="n">y_reference_stretched</span><span class="p">)</span>
+    <span class="n">eps_max_history</span><span class="p">,</span> <span class="n">c_max_history</span> <span class="o">=</span> <span class="n">stretcher</span><span class="o">.</span><span class="n">corrmax</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_max_history</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;iter #</span><span class="si">{</span><span class="n">_</span><span class="si">:</span><span class="s2">1d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">hdl</span><span class="o">.</span><span class="n">get_color</span><span class="p">())</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c_max_history</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;iter #</span><span class="si">{</span><span class="n">_</span><span class="si">:</span><span class="s2">1d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">hdl</span><span class="o">.</span><span class="n">get_color</span><span class="p">())</span>
+
+    <span class="c1"># cancel the observed stretching history</span>
+    <span class="c1"># the inverse stretched must be reset at each iteration because</span>
+    <span class="c1"># it is only valid for a given stretching history</span>
+    <span class="n">inverse_stretcher</span> <span class="o">=</span> <span class="n">InverseStretcher</span><span class="p">(</span>
+        <span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span>
+        <span class="n">eps_history</span><span class="o">=</span><span class="n">eps_max_history</span><span class="p">,</span>
+        <span class="n">interp_kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>  <span class="c1"># only linear here !!</span>
+        <span class="p">)</span>
+    <span class="n">bscan_corrected</span> <span class="o">=</span> <span class="n">inverse_stretcher</span><span class="p">(</span><span class="n">bscan</span><span class="p">)</span>
+
+    <span class="c1"># average the un-stretched bscan to get the new estimate of the reference</span>
+    <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="c1"># the new reference is the simple average of the unstretched bscan</span>
+        <span class="n">y_reference</span> <span class="o">=</span> <span class="n">bscan_corrected</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># the new reference is the weighted average of the unstretched bscan, using the stretching correl. coeff.</span>
+        <span class="n">y_reference</span> <span class="o">=</span> <span class="p">(</span><span class="n">c_max_history</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">bscan_corrected</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">c_max_history</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># TODO : weight the average by the correlation coeff of each trace</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x14b0341ef6d0&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_56_1.png" src="_images/000_examples_56_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The corrected bscan should be aligned correctly</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;input bscan&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Trace num.&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">stretcher</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">bscan</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">sharey</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;final unstretched bscan&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Trace num.&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">stretcher</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_traces</span><span class="p">),</span> <span class="n">bscan_corrected</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/000_examples_57_0.png" src="_images/000_examples_57_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="001_noise_correlation_case.html" class="btn btn-neutral float-right" title="Application to noise correlation functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, M. Lehujeur, P. Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,504 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coodddaaaa.stretching &mdash; COoDddAaaa 1.4.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=02f2166e"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            COoDddAaaa
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme_link.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">COoDddAaaa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coodddaaaa.stretching</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coodddaaaa.stretching</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright (c) 2023 maximilien.lehujeur</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coodddaaaa.interp1d</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearInterpolator1d</span><span class="p">,</span> <span class="n">CubicInterpolator1d</span><span class="p">,</span> <span class="n">RFFTInterpolator1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coodddaaaa.hypermax</span><span class="w"> </span><span class="kn">import</span> <span class="n">hypermax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">block_diag</span>
+
+
+<div class="viewcode-block" id="Stretcher">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.stretching.Stretcher">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Stretcher</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An object to compute stretched signals and to perform stretching correlation as defined in Weaver et al., 2011.</span>
+
+<span class="sd">    .. math:: X(\varepsilon) =</span>
+<span class="sd">        \frac</span>
+<span class="sd">            {\int{y^{ref}(t \times (1 + \varepsilon)) \cdot y(t) dt}}</span>
+<span class="sd">            {\sqrt{</span>
+<span class="sd">                \int{y^{ref}(t \times (1 + \varepsilon))^2 dt}</span>
+<span class="sd">                \int{y(t)^2 dt}</span>
+<span class="sd">                }}</span>
+
+
+<span class="sd">    The object pre-computes the interpolation operator.</span>
+<span class="sd">    The user can pre-compute and store the stretched basis of the reference signal.</span>
+<span class="sd">    This basis can then be provided for stretching correlation with a new signal.</span>
+<span class="sd">    This object can also compute the stretching between all pairs of signals in a b-scan.</span>
+
+<span class="sd">    :param t0: time of first sample</span>
+<span class="sd">    :param dt: sampling interval</span>
+<span class="sd">    :param nt: number of samples</span>
+<span class="sd">    :param eps: epsilon array</span>
+<span class="sd">    :param norm: use it to compute normalized correlation.</span>
+<span class="sd">                 warning : for stretching only, use norm = False</span>
+<span class="sd">    :param interp_kind: which interpolator to use for stretching, among &#39;linear&#39;, &quot;cubic&quot;, &#39;fourier&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">t0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">eps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">interp_kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s2">&quot;cubic&quot;</span><span class="p">,</span> <span class="s1">&#39;fourier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cubic&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initiate the stretcher and the interpolator on a fixed interpolation grid.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">interp_kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;cubic&#39;</span><span class="p">,</span> <span class="s1">&#39;fourier&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">t0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">t0</span><span class="p">,</span> <span class="n">nt</span><span class="p">,</span> <span class="n">dt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="n">eps</span>   <span class="c1"># 1d, shape (len(eps), )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interp_kind</span> <span class="o">=</span> <span class="n">interp_kind</span>
+
+        <span class="c1"># Time array = nodes at which the function to stretch is defined</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span>   <span class="c1"># 1d, shape (nt, )</span>
+
+        <span class="c1"># Compute the stretching time grid for all values in eps</span>
+        <span class="c1"># = points at which to evaluate the function for stretching</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stretch_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>  <span class="c1"># 2d array, shape (len(eps), nt)</span>
+
+        <span class="c1"># compute the interpolation operator once for all (based on scipy.sparse matrices)</span>
+        <span class="k">if</span> <span class="n">interp_kind</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span> <span class="o">=</span> <span class="n">LinearInterpolator1d</span><span class="p">(</span>
+                <span class="n">x0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>  <span class="c1"># nodes</span>
+                <span class="n">xi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stretch_time</span><span class="o">.</span><span class="n">flat</span><span class="p">[:],</span>  <span class="c1"># interpolation points</span>
+                <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">interp_kind</span> <span class="o">==</span> <span class="s2">&quot;cubic&quot;</span><span class="p">:</span>
+            <span class="n">t0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">nt</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">+</span> <span class="n">t0</span><span class="p">))</span> <span class="o">/</span> <span class="n">dt</span> <span class="o">&lt;=</span> <span class="mf">1e-6</span><span class="p">)</span> <span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span> <span class="o">=</span> <span class="n">CubicInterpolator1d</span><span class="p">(</span>
+                <span class="n">x0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>  <span class="c1"># nodes</span>
+                <span class="n">xi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stretch_time</span><span class="o">.</span><span class="n">flat</span><span class="p">[:],</span>  <span class="c1"># interpolation points</span>
+                <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">interp_kind</span> <span class="o">==</span> <span class="s2">&quot;fourier&quot;</span><span class="p">:</span>
+            <span class="n">t0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">nt</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">+</span> <span class="n">t0</span><span class="p">))</span> <span class="o">/</span> <span class="n">dt</span> <span class="o">&lt;=</span> <span class="mf">1e-6</span><span class="p">)</span> <span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span> <span class="o">=</span> <span class="n">RFFTInterpolator1d</span><span class="p">(</span>
+                <span class="n">x0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>  <span class="c1"># nodes</span>
+                <span class="n">xi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stretch_time</span><span class="o">.</span><span class="n">flat</span><span class="p">[:],</span>  <span class="c1"># interpolation points</span>
+                <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">interp_kind</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Stretcher.stretch">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.stretching.Stretcher.stretch">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stretch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the stretched basis functions from a signal x</span>
+
+<span class="sd">        :param x: the input signal (reference), np.ndarray, 1d, shape (nt, )</span>
+<span class="sd">        :return x_stretched: the stretched version of x for all values in self.eps, np.ndarray 2d, shape (neps, nt)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">x_stretched</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stretch_time</span><span class="p">)</span>
+        <span class="n">x_stretched</span><span class="o">.</span><span class="n">flat</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">:</span>
+            <span class="c1"># normalize the stretched function now for efficiency</span>
+            <span class="c1"># instead of doing it in the correlation</span>
+            <span class="c1"># =&gt; WARNING : this will affect the amplitudes of the stretched data</span>
+            <span class="c1">#              for stretching only, user must use norm=False</span>
+
+            <span class="c1"># norm = np.linalg.norm(x_stretched, axis=1)</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_stretched</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mf">0.5</span>
+
+            <span class="c1"># NB : I&#39;ve tried Numba (this ref) =&gt; no gain at all</span>
+            <span class="c1"># https://stackoverflow.com/questions/30437947/</span>
+            <span class="c1"># most-memory-efficient-way-to-compute-abs2-of-complex-numpy-ndarray</span>
+
+            <span class="n">x_stretched</span> <span class="o">*=</span> <span class="n">norm</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">x_stretched</span></div>
+
+
+<div class="viewcode-block" id="Stretcher.corr">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.stretching.Stretcher.corr">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">corr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">x_stretched</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stretching correlation of x with a basis of stretched versions of the reference signal</span>
+
+<span class="sd">        :param x: signal(s) to be correlated to the reference, np.ndarray,</span>
+<span class="sd">            either one single signal, 1d, shape (nt, )</span>
+<span class="sd">            or a bscan, 2d, shape (ntraces, nt)</span>
+<span class="sd">        :param x_stretched: stretched reference from self.stretch, np.ndarray, 2d, shape (neps, nt, )</span>
+<span class="sd">        :return c: correlation function np.ndarray,</span>
+<span class="sd">            either 1d, shape (neps, ) if x is 1d</span>
+<span class="sd">            or 2d, shape (neps, ntraces) if x is 2d</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nt</span><span class="p">,</span> <span class="p">),</span> \
+                <span class="sa">f</span><span class="s1">&#39;Shape Error : x must be 1 trace of shape (nt=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nt</span><span class="si">}</span><span class="s1">, )&#39;</span>
+
+        <span class="k">elif</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">nt</span><span class="p">,</span> \
+                <span class="sa">f</span><span class="s1">&#39;Shape Error : x must be a bscan of shape (ntraces, nt=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nt</span><span class="si">}</span><span class="s1">)&#39;</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Shape Error, x must be 1d (for single signal) or 2d (for a bscan)&#39;</span><span class="p">)</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">x_stretched</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>  <span class="c1"># np.ndarray, shape (neps, ntraces)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">:</span>
+            <span class="c1"># the normalization relative to x_stretched</span>
+            <span class="c1"># is already done</span>
+            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># faster?</span>
+                <span class="n">c</span> <span class="o">/=</span> <span class="n">x</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+            <span class="k">elif</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">c</span> <span class="o">/=</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>  <span class="c1"># shape (ntraces, )</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;programming error&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c</span></div>
+
+
+<div class="viewcode-block" id="Stretcher.corrmax">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.stretching.Stretcher.corrmax">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">corrmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the maximum of the correlation function with subsample precision</span>
+
+<span class="sd">        :param c: correlation function(s) from self.corr</span>
+<span class="sd">            1d for a single signal, shape (neps, )</span>
+<span class="sd">            2d for a bscan, shape (neps, ntraces)</span>
+<span class="sd">        :return emax: best epsilon value, dimensionless, it corresponds to dt/t</span>
+<span class="sd">            float if c is 1d</span>
+<span class="sd">            1d array, shape (ntraces, ) if c is 2d</span>
+<span class="sd">        :return cmax: max correlation, dimensionless, normalized if norm was True in __init__</span>
+<span class="sd">            float if c is 1d</span>
+<span class="sd">            1d array, shape (ntraces, ) if c is 2d</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">epsmax</span> <span class="o">=</span> <span class="n">hypermax</span><span class="p">(</span>
+                <span class="n">time_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span>
+                <span class="n">function_array</span><span class="o">=</span><span class="n">c</span><span class="p">,</span>
+                <span class="n">assume_t_growing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">cmax</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">c</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">neps</span><span class="p">,</span> <span class="n">ntraces</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">assert</span> <span class="n">neps</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Shape Error, c must be of shape (neps=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span><span class="si">}</span><span class="s2">, ntraces)&quot;</span>
+
+            <span class="n">epsmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ntraces</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ntraces</span><span class="p">):</span>
+                <span class="c1"># TODO : implement 2d version of hypermax to avoid the loop ?</span>
+                <span class="n">epsmax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">hypermax</span><span class="p">(</span>
+                    <span class="n">time_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span>
+                    <span class="n">function_array</span><span class="o">=</span><span class="n">c</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span>
+                    <span class="n">assume_t_growing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">cmax</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># one max per trace</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Shape Error, c must be 1d (single trace) or 2d (bscan)&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">epsmax</span><span class="p">,</span> <span class="n">cmax</span></div>
+
+
+<div class="viewcode-block" id="Stretcher.corr_all_with_all">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.stretching.Stretcher.corr_all_with_all">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">corr_all_with_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Correlate all possible pairs of signals in a bscan</span>
+
+<span class="sd">        :param data: the bscan, one trace per row, same sampling (=self.t), 2d, shape (ntraces, nt)</span>
+<span class="sd">        :return c_triu: the max correlation coefficients for all pairs (upper triangle only)</span>
+<span class="sd">        :return e_triu: the best stretching coefficients for all pairs (upper triangle only)</span>
+<span class="sd">        use self.triu2dence to get the full matrices</span>
+
+<span class="sd">        c = Stretcher.triu2dense(c_triu, symetric=True, diag=1.0)</span>
+<span class="sd">        e = Stretcher.triu2dense(e_triu, symetric=False, diag=0.0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ntraces</span><span class="p">,</span> <span class="n">nsamps</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">c_triu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ntraces</span> <span class="o">*</span> <span class="p">(</span><span class="n">ntraces</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">e_triu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ntraces</span> <span class="o">*</span> <span class="p">(</span><span class="n">ntraces</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># itriu, jtriu = np.triu_indices(ntraces, 1)</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ntraces</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># print(f&#39;{i+1}/{ntraces - 1}&#39;)</span>
+            <span class="c1"># stretch new reference</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">y_stretched</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stretch</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="c1"># correlate all remaining traces to this new reference</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">ntraces</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">cijs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:],</span> <span class="n">x_stretched</span><span class="o">=</span><span class="n">y_stretched</span><span class="p">)</span>
+            <span class="n">e_triu</span><span class="p">[</span><span class="n">n</span><span class="p">:</span> <span class="n">n</span><span class="o">+</span><span class="n">m</span><span class="p">],</span> <span class="n">c_triu</span><span class="p">[</span><span class="n">n</span><span class="p">:</span> <span class="n">n</span><span class="o">+</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">corrmax</span><span class="p">(</span><span class="n">cijs</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">m</span>
+
+        <span class="k">return</span> <span class="n">c_triu</span><span class="p">,</span> <span class="n">e_triu</span></div>
+
+
+<div class="viewcode-block" id="Stretcher.triu2dense">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.stretching.Stretcher.triu2dense">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">triu2dense</span><span class="p">(</span><span class="n">x_triu</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">symetric</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">diag</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert upper triangle matrix to square matrix</span>
+
+<span class="sd">        :param x_triu: a flat upper triangle without diagonal, 1d, np.ndarray, shape (ntraces * (ntraces - 1) / 2, )</span>
+<span class="sd">        :param symetric: to impose symetry (True) or anti-symetry (False)</span>
+<span class="sd">        :param diag: the value to put on the diagonal</span>
+<span class="sd">        :return x:</span>
+<span class="sd">            a square matrix with x_triu on its upper triangle, shape (ntraces, ntraces)</span>
+<span class="sd">            diag on its diagonal</span>
+<span class="sd">            +-x_triu on its lower triangle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 2n = (x * (x -1))</span>
+        <span class="c1"># 2n = x ** 2 - x</span>
+        <span class="c1"># x ** 2 - x - 2n = 0</span>
+        <span class="c1"># d = 2 + 8 * n</span>
+        <span class="c1">#</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_triu</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="n">diag</span>
+
+        <span class="n">ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_triu</span>
+        <span class="k">if</span> <span class="n">symetric</span><span class="p">:</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="Stretcher.stretching_uncertainty">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.stretching.Stretcher.stretching_uncertainty">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stretching_uncertainty</span><span class="p">(</span>
+            <span class="n">cmax</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">fmin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">fmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tmin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> \
+            <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stretching uncertainty after Weaver et al 2011.</span>
+
+<span class="sd">        :param cmax: max correlation coefficient from self.corrmax, either a float or a np.ndarray</span>
+<span class="sd">        :param fmin: lower freq Hz, float</span>
+<span class="sd">        :param fmax: upper freq Hz, float</span>
+<span class="sd">        :param tmin: start coda time in s, float</span>
+<span class="sd">        :param tmax: end coda time in s, float</span>
+<span class="sd">        :return rmse: uncertainty on epsilon, same type as cmax</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">wc</span> <span class="o">=</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">fmin</span> <span class="o">*</span> <span class="n">fmax</span><span class="p">)</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">fmax</span> <span class="o">-</span> <span class="n">fmin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="p">))</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">cmax</span>
+        <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">X</span> <span class="o">**</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">X</span><span class="p">)</span>
+        <span class="n">rmse</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="mi">6</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">wc</span> <span class="o">**</span> <span class="mf">2.</span> <span class="o">*</span> <span class="p">(</span><span class="n">tmax</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">tmin</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">rmse</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="InverseStretcher">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.stretching.InverseStretcher">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InverseStretcher</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An object to cancel the effect of the stretching on each trace of a bscan</span>
+<span class="sd">    This can be used to align the traces with the reference, and then to refine the reference.</span>
+
+<span class="sd">    For example:</span>
+<span class="sd">        you have a bscan of 256 traces with n samples each, bscan is a 2d array shapped (256, n)</span>
+<span class="sd">        you have an estimate of the stretching history, i.e. 256 epsilon values in an 1D array</span>
+<span class="sd">        this object returns the bscan corrected from the estimated stretching values</span>
+<span class="sd">            positive epsilon values (i.e. positive dv/v) mean that the trace was compressed relative to its ref, so this operator stretch it</span>
+<span class="sd">            negative epsilon values will tend to compress the waveform</span>
+
+<span class="sd">    :param t0: time of first sample</span>
+<span class="sd">    :param nt: number of samples</span>
+<span class="sd">    :param dt: sampling interval</span>
+
+<span class="sd">    :param eps_history: epsilon array, one item per trace in the bscan</span>
+<span class="sd">    :param interp_kind: which interpolator to use for inverse stretching, among &#39;linear&#39;,</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">nt</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">eps_history</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">interp_kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">t0</span> <span class="o">=</span> <span class="n">t0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nt</span> <span class="o">=</span> <span class="n">nt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps_history</span> <span class="o">=</span> <span class="n">eps_history</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nt</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+        <span class="k">if</span> <span class="n">interp_kind</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+            <span class="n">block_diagonals</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="n">eps_history</span><span class="p">:</span>
+
+                <span class="n">op</span> <span class="o">=</span> <span class="n">LinearInterpolator1d</span><span class="p">(</span>
+                    <span class="n">x0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t0</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nt</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span> <span class="n">xi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_array</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">eps</span><span class="p">))</span>
+
+                <span class="n">op</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">lininterp_operator</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># transpose to get the inverser interpolator</span>
+
+                <span class="n">block_diagonals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">interp_kind</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span> <span class="o">=</span> <span class="n">block_diag</span><span class="p">(</span><span class="n">block_diagonals</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;csr&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bscan</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bscan</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eps_history</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nt</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;shape error, bscan is </span><span class="si">{</span><span class="n">bscan</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;and should be (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eps_history</span><span class="p">)</span><span class="si">=}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nt</span><span class="si">=}</span><span class="s1">)&#39;</span>
+                <span class="p">)</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">bscan</span><span class="p">)</span>
+        <span class="n">ans</span><span class="o">.</span><span class="n">flat</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolator</span> <span class="o">*</span> <span class="n">bscan</span><span class="o">.</span><span class="n">flat</span><span class="p">[:]</span>
+        <span class="k">return</span> <span class="n">ans</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">coodddaaaa.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span><span class="p">,</span> <span class="n">polyspace</span>
+
+    <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;constructor&#39;</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">Stretcher</span><span class="p">(</span>
+            <span class="n">nt</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span>
+            <span class="n">dt</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+            <span class="n">t0</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+            <span class="n">eps</span><span class="o">=</span><span class="n">polyspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="n">pwr</span><span class="o">=</span><span class="mf">2.0</span><span class="p">),</span>
+            <span class="n">interp_kind</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">nt</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;stretch&#39;</span><span class="p">):</span>
+        <span class="n">x_stretched</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">stretch</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_stretched</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;hypermax&#39;</span><span class="p">):</span>
+        <span class="n">epsmax</span><span class="p">,</span> <span class="n">cmax</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">corrmax</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">123</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">nt</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;corr_all_with_all&#39;</span><span class="p">):</span>
+        <span class="n">c_triu</span><span class="p">,</span> <span class="n">e_triu</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">corr_all_with_all</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="s1">&#39;triu2dense x2&#39;</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">triu2dense</span><span class="p">(</span><span class="n">c_triu</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">triu2dense</span><span class="p">(</span><span class="n">e_triu</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Timer[constructor]: 312.93 ms</span>
+<span class="sd">    Timer[stretch]: 12.13 ms</span>
+<span class="sd">    Timer[corr]: 0.33 ms</span>
+<span class="sd">    Timer[hypermax]: 0.10 ms</span>
+<span class="sd">    Timer[corr_all_with_all]: 2904.68 ms</span>
+<span class="sd">    Timer[triu2dense x2]: 7.41 ms</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, M. Lehujeur, P. Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

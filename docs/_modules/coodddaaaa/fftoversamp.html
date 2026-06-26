@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coodddaaaa.fftoversamp &mdash; COoDddAaaa 1.4.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=02f2166e"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            COoDddAaaa
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme_link.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">COoDddAaaa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">coodddaaaa.fftoversamp</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for coodddaaaa.fftoversamp</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Modified after sigy 1.5.3, M.L. 20/08/2023</span>
+
+<span class="sd">Fourier domain oversampling, for the sake of simplicity, </span>
+<span class="sd">this program can increase the number of samples only by 2**n, where n is an integer.</span>
+
+<span class="sd">The oversampling is performed in the Fourier domain, </span>
+<span class="sd">- for optimal use, it is preferred to use the fft_oversamp</span>
+<span class="sd">  if the signal is already in Fourier domain</span>
+<span class="sd">- make sure the signal is properly detrended and tapered at its edges prior to FFT</span>
+<span class="sd">  otherwise, you might observe wiggles at the edges of the signal after oversampling.</span>
+<span class="sd">  (remember that fft assume a periodization of the signal in time)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.fftpack</span><span class="w"> </span><span class="kn">import</span> <span class="n">fft</span><span class="p">,</span> <span class="n">ifft</span>
+
+
+<div class="viewcode-block" id="oversamp">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.fftoversamp.oversamp">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">oversamp</span><span class="p">(</span><span class="n">t0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+             <span class="n">npow2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">demean</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Time domain version of fft_oversamp</span>
+
+<span class="sd">    :param t0: start time, sec</span>
+<span class="sd">    :param dt: sampling interval, sec</span>
+<span class="sd">    :param data: time domain data array (1d or more)</span>
+<span class="sd">    :param npow2: oversamp by 2 ** npow2</span>
+<span class="sd">    :param axis: axis along which to oversample the signal</span>
+<span class="sd">    :return to: the new time vector</span>
+<span class="sd">    :return datao: the oversample data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nt</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+    <span class="n">t_over</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nt</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">npow2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">npow2</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">demean</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="mf">0.</span>
+
+    <span class="c1"># factor = exp(npow2 * log(2))</span>
+    <span class="c1"># npow2 = log(factor) / log(2)</span>
+    <span class="n">data_over</span> <span class="o">=</span> <span class="n">ifft</span><span class="p">(</span>
+        <span class="n">fft_oversamp</span><span class="p">(</span>
+            <span class="n">fft</span><span class="p">(</span><span class="n">data</span> <span class="o">-</span> <span class="n">m</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">),</span>
+            <span class="n">npow2</span><span class="o">=</span><span class="n">npow2</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">),</span>
+        <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">real</span> <span class="o">+</span> <span class="n">m</span>
+    <span class="k">return</span> <span class="n">t_over</span><span class="p">,</span> <span class="n">data_over</span></div>
+
+
+
+<div class="viewcode-block" id="fft_oversamp">
+<a class="viewcode-back" href="../../coodddaaaa.html#coodddaaaa.fftoversamp.fft_oversamp">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fft_oversamp</span><span class="p">(</span><span class="n">fft_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">npow2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Oversamp a signal by padding it with zeros in the FFT domain</span>
+<span class="sd">    the number of sample is multiplied by 2 ** npow2 (default 2**1)</span>
+
+<span class="sd">    :param fft_data: output of fft</span>
+<span class="sd">    :param npow2: oversampling rate expressed as a power of 2</span>
+<span class="sd">    :param axis: the axis along which to perform oversampling</span>
+<span class="sd">    :return: oversample data in fft domain</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">npow2</span>
+
+    <span class="n">npts</span> <span class="o">=</span> <span class="n">fft_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+
+    <span class="n">i_first_negative_freq</span> <span class="o">=</span> <span class="n">npts</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">npts</span> <span class="o">%</span> <span class="mi">2</span>
+    <span class="n">n_positive_freqs</span> <span class="o">=</span> <span class="n">i_first_negative_freq</span>
+    <span class="n">n_negative_freqs</span> <span class="o">=</span> <span class="n">npts</span> <span class="o">-</span> <span class="n">n_positive_freqs</span>
+
+    <span class="n">new_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fft_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">new_shape</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">npts</span>
+    <span class="n">new_fft_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">new_shape</span><span class="p">,</span> <span class="nb">complex</span><span class="p">)</span>
+
+    <span class="n">view</span> <span class="o">=</span> <span class="n">fft_data</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+    <span class="n">new_view</span> <span class="o">=</span> <span class="n">new_fft_data</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+
+    <span class="n">new_view</span><span class="p">[:</span><span class="n">n_positive_freqs</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">view</span><span class="p">[:</span><span class="n">i_first_negative_freq</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">new_view</span><span class="p">[</span><span class="o">-</span><span class="n">n_negative_freqs</span><span class="p">:,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">view</span><span class="p">[</span><span class="n">i_first_negative_freq</span><span class="p">:,</span> <span class="o">...</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">new_fft_data</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">butter</span><span class="p">,</span> <span class="n">sosfiltfilt</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal.windows</span><span class="w"> </span><span class="kn">import</span> <span class="n">tukey</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+    <span class="n">nt</span> <span class="o">=</span> <span class="mi">127</span>  <span class="c1"># number of samples</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># sampling interval in sec</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.012351503</span>  <span class="c1"># starttime in sec</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span>
+    <span class="c1"># ny = 0.5 / dt  # nyquist, Hz</span>
+
+    <span class="c1"># prepare bandpass filter and time taper</span>
+    <span class="n">sos</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span>  <span class="c1"># order</span>
+            <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>  <span class="c1"># fmin, fmax relative to nyquist</span>
+            <span class="n">output</span><span class="o">=</span><span class="s2">&quot;sos&quot;</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s2">&quot;band&quot;</span><span class="p">)</span>
+    <span class="n">taper</span> <span class="o">=</span> <span class="n">tukey</span><span class="p">(</span><span class="n">nt</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="c1"># generate random signal</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span>
+
+    <span class="c1"># bandpass / taper</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">sosfiltfilt</span><span class="p">(</span><span class="n">sos</span><span class="o">=</span><span class="n">sos</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">*=</span> <span class="n">taper</span>  
+
+    <span class="c1"># oversamp</span>
+    <span class="n">t1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">oversamp</span><span class="p">(</span><span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">npow2</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">demean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;ko-&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, M. Lehujeur, P. Mora.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
