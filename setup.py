@@ -32,6 +32,8 @@ class MakeTheDoc(setuptools.Command):
         subprocess.run(
             ['sphinx-build docsrc docs'], shell=True)
 
+with open('README.md', 'r') as fid:
+    long_description = "".join(fid.readlines())
 
 __version__ = load_version_number()        
 setuptools.setup(
@@ -40,7 +42,7 @@ setuptools.setup(
     author="Maximilien Lehujeur / Pierric Mora",
     author_email="maximilien.lehujeur@univ-eiffel.fr",
     description="Coda stretching",
-    long_description="",
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="",
     packages=setuptools.find_packages(),
